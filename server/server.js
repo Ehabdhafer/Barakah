@@ -20,6 +20,7 @@ const donation_router = require("./routes/donation_route");
 const contact_router = require("./routes/contactus_route");
 const order_router = require("./routes/order_route");
 const feedback_router = require("./routes/feedback_route");
+const confirm_router = require("./routes/confirm_route");
 
 // ---------------------------------------------------------------------
 
@@ -30,6 +31,7 @@ app.use(donation_router);
 app.use(contact_router);
 app.use(order_router);
 app.use(feedback_router);
+app.use(confirm_router);
 
 // ---------------------------------------------------------------------
 

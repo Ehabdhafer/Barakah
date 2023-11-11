@@ -7,6 +7,9 @@ router.post("/login", userController.loginUser);
 router.get("/alluser", userController.getUserDetails);
 router.get("/user/:user_id", userController.getuserinfo);
 router.put("/updateuser/:user_id", userController.update_user);
+router.put("/updateuserrole/:user_id", userController.update_userrole);
 router.put("/deleteuser/:user_id", userController.delete_user);
+router.get("/countalluser", userController.countalluser);
+router.get("/countusersub", userController.countusersub);
 
 module.exports = router;

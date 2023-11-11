@@ -157,7 +157,7 @@ exports.deletedonation = async (req, res) => {
 
 // --------------------------------------------------count all donation  -----------------------------------------
 
-exports.countusersub = async (req, res) => {
+exports.countdonation = async (req, res) => {
   try {
     const query = `select count(*) from donation where is_deleted = false`;
     const result = await db.query(query);

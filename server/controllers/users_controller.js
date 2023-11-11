@@ -257,7 +257,7 @@ exports.countusersub = async (req, res) => {
 };
 // --------------------------------------------------count all users  -----------------------------------------
 
-exports.countusersub = async (req, res) => {
+exports.countalluser = async (req, res) => {
   try {
     const query = `select count(*) from users where is_deleted = false`;
     const result = await db.query(query);
@@ -265,5 +265,34 @@ exports.countusersub = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// --------------------------------------------------update user role ---------------------------------------------
+
+exports.update_userrole = async (req, res) => {
+  const { user_id } = req.params;
+  const { role_id } = req.body;
+
+  try {
+    {
+      const userQuery = "SELECT * FROM users WHERE user_id = $1";
+      const user = await db.query(userQuery, [user_id]);
+
+      if (!user.rows.length) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const updateQuery = ` UPDATE users SET role_id = $2
+       WHERE user_id = $1 and is_deleted = false RETURNING user_id`;
+
+      await db.query(updateQuery, [user_id, role_id]);
+      res.status(200).json({
+        message: "User role updated successfully",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to update user role");
   }
 };
