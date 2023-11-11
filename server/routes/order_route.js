@@ -3,6 +3,8 @@ const orderController = require("../controllers/order_controller");
 const router = Router();
 const verify = require("../middleware/authorizationJWT");
 
+// verify.authorize([1]);
+
 router.get("/getallorder", orderController.getorder);
 router.post("/postorder", orderController.postorder);
 router.get("/getorder/:id", orderController.getorderid);

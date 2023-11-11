@@ -73,7 +73,6 @@ exports.registerUser = async (req, res) => {
 
         res.status(201).json({
           message: "User Added Successfully",
-          // user_id: user.rows[0].user_id,
           token: token,
         });
       }
@@ -103,7 +102,7 @@ exports.loginUser = async (req, res) => {
         return;
       }
       const payload = {
-        first_name: checked.rows[0].username,
+        username: checked.rows[0].username,
         email: checked.rows[0].email,
         role_id: checked.rows[0].role_id,
         user_id: checked.rows[0].user_id,
@@ -113,7 +112,6 @@ exports.loginUser = async (req, res) => {
 
       res.status(200).json({
         message: "Login Successfully",
-        // user_id: checked.rows.user_id,
         token: token,
       });
     }
