@@ -21,7 +21,6 @@ exports.card_check = async (req, res) => {
       const card = checked.rows[0];
       const payment_time = new Date();
       const payment_status = "approved";
-      //   console.log(card.balance);
 
       if (payment_amount > card.balance) {
         res.status(400).json({ error: "Insufficient balance" });
@@ -47,9 +46,11 @@ exports.card_check = async (req, res) => {
         const updateBalanceValues = [payment_amount, checked.rows[0].card_id];
 
         await db.query(updateBalanceQuery, updateBalanceValues);
+        const updateuserquery = `update users set subscription = true where user_id = $1`;
+        await db.query(updateuserquery, [user_id]);
 
         res.status(200).json({
-          message: "card added Successfully",
+          message: "Subscribed Successfully",
         });
       }
     }
@@ -62,8 +63,7 @@ exports.card_check = async (req, res) => {
 exports.paymentdata = async (req, res) => {
   try {
     const pay = await db.query(
-      `select * from payments `
-      //   where payment_status = 'pending'
+      `select * from payments where is_deleted = false`
     );
     res.json(pay.rows);
   } catch (err) {

@@ -151,7 +151,7 @@ exports.getuserinfo = async (req, res) => {
 
 exports.update_user = async (req, res) => {
   const { user_id } = req.params;
-  const { username, email, phone, city } = req.body;
+  const { username, email, phone, city, oldpassword, password } = req.body;
 
   try {
     const schema = Joi.object({
@@ -162,11 +162,19 @@ exports.update_user = async (req, res) => {
       phone: Joi.string()
         .pattern(/^[0-9]{7,12}$/)
         .required(),
+      password: Joi.string()
+        .pattern(
+          new RegExp(
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&!])[A-Za-z\\d@#$%^&!]{6,30}$"
+          )
+        )
+        .required(),
     });
     const validate = schema.validate({
       username,
       email,
       phone,
+      password,
     });
     if (validate.error) {
       res.status(405).json({ error: validate.error.details });
@@ -177,10 +185,28 @@ exports.update_user = async (req, res) => {
       if (!user.rows.length) {
         return res.status(404).json({ error: "User not found" });
       }
+      const storedHashedPassword = user.rows[0].password;
+      const matched_password = await bcrypt.compare(
+        oldpassword,
+        storedHashedPassword
+      );
+      if (!matched_password) {
+        res.status(400).json({ message: "old password is incorrect" });
+        return;
+      }
+      const newpassword = await bcrypt.hash(password, 10);
 
-      const updateQuery = ` UPDATE users SET username = $2,  email = $3,  phone = $4, city = $5 WHERE user_id = $1 and is_deleted = false RETURNING user_id`;
+      const updateQuery = ` UPDATE users SET username = $2,  email = $3,  phone = $4, city = $5, password = $6
+       WHERE user_id = $1 and is_deleted = false RETURNING user_id`;
 
-      await db.query(updateQuery, [user_id, username, email, phone, city]);
+      await db.query(updateQuery, [
+        user_id,
+        username,
+        email,
+        phone,
+        city,
+        newpassword,
+      ]);
       res.status(200).json({
         message: "User details updated successfully",
         // user_id: updatedUser.rows[0].user_id,
@@ -214,5 +240,30 @@ exports.delete_user = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
+  }
+};
+
+// --------------------------------------------------count users subscibed -----------------------------------------
+
+exports.countusersub = async (req, res) => {
+  try {
+    const query = `select count(*) from users where subscription = true and is_deleted = false`;
+    const result = await db.query(query);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+// --------------------------------------------------count all users  -----------------------------------------
+
+exports.countusersub = async (req, res) => {
+  try {
+    const query = `select count(*) from users where is_deleted = false`;
+    const result = await db.query(query);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

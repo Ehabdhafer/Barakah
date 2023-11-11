@@ -1,10 +1,10 @@
 const db = require("../models/db");
 
-// --------------------------------------------------get all contact --------------------------------------
+// --------------------------------------------------get all feedbacks --------------------------------------
 
-exports.getcontact = async (req, res) => {
+exports.getfeedback = async (req, res) => {
   try {
-    const query = `select * from contact_us where is_deleted = false`;
+    const query = `select * from feedback where is_deleted = false`;
     const result = await db.query(query);
     res.json(result.rows);
   } catch (err) {
@@ -13,15 +13,15 @@ exports.getcontact = async (req, res) => {
   }
 };
 
-// --------------------------------------------------post contact --------------------------------------
+// --------------------------------------------------post feedback --------------------------------------
 
-exports.postcontact = async (req, res) => {
-  const { name, email, subject, message } = req.body;
+exports.postfeedback = async (req, res) => {
+  const { message } = req.body;
   const time = new Date();
   try {
-    const query = `insert into contact_us (name,email,subject,message,submitted_at)
-        values ($1,$2,$3,$4,$5)`;
-    values = [name, email, subject, message, time];
+    const query = `insert into feedback (message,created_at)
+        values ($1,$2)`;
+    values = [message, time];
     await db.query(query, values);
     res.status(201).json({ message: `Your Message have been sent` });
   } catch (err) {
@@ -30,12 +30,12 @@ exports.postcontact = async (req, res) => {
   }
 };
 
-// --------------------------------------------------get contact by id --------------------------------------
+// // --------------------------------------------------get feedback by id --------------------------------------
 
-exports.contactid = async (req, res) => {
+exports.feedbackid = async (req, res) => {
   const { id } = req.params;
   try {
-    const query = `select * from contact_us where contact_id=$1 and is_deleted = false`;
+    const query = `select * from feedback where feedback_id=$1 and is_deleted = false`;
     const result = await db.query(query, [id]);
     if (!result.rowCount) {
       return res.status(404).json({ error: "Message not found" });
@@ -48,12 +48,12 @@ exports.contactid = async (req, res) => {
   }
 };
 
-// --------------------------------------------------delete contact --------------------------------------
+// // --------------------------------------------------delete feedback --------------------------------------
 
-exports.deletecontact = async (req, res) => {
+exports.deletefeedback = async (req, res) => {
   const { id } = req.params;
   try {
-    const query = `update contact_us set is_deleted = true where contact_id =$1`;
+    const query = `update feedback set is_deleted = true where feedback_id =$1`;
     const result = await db.query(query, [id]);
     if (!result.rowCount) {
       return res.status(404).json({ error: "Message not found" });
