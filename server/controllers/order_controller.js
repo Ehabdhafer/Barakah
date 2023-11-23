@@ -1,14 +1,11 @@
-const db = require("../models/db");
+const ordermodel = require("../models/order_model");
 
 // --------------------------------------------------get all orders --------------------------------------
 
 exports.getorder = async (req, res) => {
   try {
-    const query = `select * from orders inner join donation on 
-    orders.donation_id = donation.donation_id
-    where orders.is_deleted = false`;
-    const result = await db.query(query);
-    res.json(result.rows);
+    const result = await ordermodel.getOrders();
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
@@ -18,59 +15,30 @@ exports.getorder = async (req, res) => {
 // --------------------------------------------------post order --------------------------------------
 
 exports.postorder = async (req, res) => {
-  const {
-    username,
-    city,
-    phone,
-    user_id,
-    donation_id,
-    total_amount,
-    is_charity,
-  } = req.body;
+  const { order_city, phone, donation_id } = req.body;
+  const user_id = req.user.user_id;
+
   try {
-    const query = `insert into orders (username, order_city, phone, user_id, donation_id, total_amount, is_charity,order_time)
-    values ($1,$2,$3,$4,$5,$6,$7,$8)
-    `;
-    const order_time = new Date();
-    values = [
-      username,
-      city,
-      phone,
-      user_id,
-      donation_id,
-      total_amount,
-      is_charity,
-      order_time,
-    ];
-    await db.query(query, values);
+    await ordermodel.postOrder(order_city, phone, donation_id, user_id);
     res.status(200).json({
-      message: `Order Created Sucessfully`,
+      message: `Order Created Successfully`,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: err.message });
   }
 };
 
-// --------------------------------------------------get order by id --------------------------------------
+// --------------------------------------------------get order by user_id --------------------------------------
 
 exports.getorderid = async (req, res) => {
-  const { id } = req.params;
+  const user_id = req.user.user_id;
   try {
-    const result = await db.query(
-      `select * from orders inner join 
-      donation on orders.donation_id = donation.donation_id
-      where orders.is_deleted = false and orders.user_id =$1`,
-      [id]
-    );
-    if (!result.rowCount) {
-      return res.status(404).json({ error: "Order not found" });
-    } else {
-      res.json(result.rows);
-    }
+    const result = await ordermodel.getOrderByUserId(user_id);
+    res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(404).json({ message: err.message });
   }
 };
 
@@ -78,21 +46,15 @@ exports.getorderid = async (req, res) => {
 
 exports.updateorder = async (req, res) => {
   const { id } = req.params;
-  const { username, order_city, phone } = req.body;
+  const { order_city, phone } = req.body;
   try {
-    const query = `update orders set username=$1, order_city=$2, phone=$3 where order_id=$4 and is_deleted = false`;
-    values = [username, order_city, phone, id];
-    const result = await db.query(query, values);
-    if (!result.rowCount) {
-      return res.status(404).json({ error: "Order not found" });
-    } else {
-      res.status(200).json({
-        message: `Order Updated Successfully`,
-      });
-    }
+    await ordermodel.updateOrder(id, order_city, phone);
+    res.status(200).json({
+      message: `Order Updated Successfully`,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(404).json({ message: err.message });
   }
 };
 
@@ -101,18 +63,13 @@ exports.updateorder = async (req, res) => {
 exports.deleteorder = async (req, res) => {
   const { id } = req.params;
   try {
-    const query = `update orders set is_deleted = true where order_id =$1`;
-    const result = await db.query(query, [id]);
-    if (!result.rowCount) {
-      return res.status(404).json({ error: "Order not found" });
-    } else {
-      res.status(200).json({
-        message: `Order Deleted Successfully`,
-      });
-    }
+    await ordermodel.deleteOrder(id);
+    res.status(200).json({
+      message: `Order Deleted Successfully`,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send(`Failed to delete Order, Internal Server Error`);
+    res.status(404).json({ message: err.message });
   }
 };
 
@@ -121,19 +78,10 @@ exports.deleteorder = async (req, res) => {
 exports.getorderhistory = async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await db.query(
-      `select * from orders inner join 
-      donation on orders.donation_id = donation.donation_id
-      where orders.is_deleted = true and orders.user_id =$1`,
-      [id]
-    );
-    if (!result.rowCount) {
-      return res.status(404).json({ error: "Order not found" });
-    } else {
-      res.json(result.rows);
-    }
+    const result = await ordermodel.getOrderHistory(id);
+    res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(404).json({ message: err.message });
   }
 };

@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+    font-family: 'Montserrat', sans-serif;
+}
+
+.parallelogram {
+    width: 800px;
+    height: 500px;
+    transform: skew(-20deg);
+  }

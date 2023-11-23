@@ -1,24 +1,13 @@
-const db = require("../models/db");
+const confirmmodel = require("../models/confirm_model");
 
 // --------------------------------------------------post confirm order --------------------------------------
 
 exports.postconfirm = async (req, res) => {
   const { order_id } = req.body;
   try {
-    const query = `INSERT INTO confirmorder (order_id, user_id, donation_id)
-    SELECT order_id, user_id, donation_id
-    FROM orders
-    WHERE order_id = $1;
-    `;
-    await db.query(query, [order_id]);
-    const donationsoft = `UPDATE donation
-    SET is_deleted = true
-    FROM confirmorder
-    WHERE donation.donation_id = confirmorder.donation_id
-      AND confirmorder.order_id = $1`;
-    await db.query(donationsoft, [order_id]);
+    await confirmmodel.postConfirmOrder(order_id);
     res.status(200).json({
-      message: `Order Confirmed Sucessfully`,
+      message: `Order Confirmed Successfully`,
     });
   } catch (err) {
     console.error(err);
@@ -30,13 +19,8 @@ exports.postconfirm = async (req, res) => {
 
 exports.getconfirm = async (req, res) => {
   try {
-    const query = `select * from confirmorder 
-        join donation on confirmorder.donation_id = donation.donation_id
-        join orders on confirmorder.order_id = orders.order_id
-        where confirmorder.is_deleted = false
-        `;
-    const result = await db.query(query);
-    res.json(result.rows);
+    const result = await confirmmodel.getConfirmedOrders();
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
@@ -48,20 +32,11 @@ exports.getconfirm = async (req, res) => {
 exports.getconfirmid = async (req, res) => {
   const { id } = req.params;
   try {
-    const query = `select * from confirmorder 
-          join donation on confirmorder.donation_id = donation.donation_id
-          join orders on confirmorder.order_id = orders.order_id
-          where confirmorder.is_deleted = false and confirmorder.confirm_id = $1
-          `;
-    const result = await db.query(query, [id]);
-    if (!result.rowCount) {
-      return res.status(404).json({ error: "Order not found" });
-    } else {
-      res.json(result.rows);
-    }
+    const result = await confirmmodel.getConfirmedOrderById(id);
+    res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(404).json({ message: err.message });
   }
 };
 
@@ -70,17 +45,25 @@ exports.getconfirmid = async (req, res) => {
 exports.deleteconfirm = async (req, res) => {
   const { id } = req.params;
   try {
-    const query = `update confirmorder set is_deleted = true where confirm_id =$1`;
-    const result = await db.query(query, [id]);
-    if (!result.rowCount) {
-      return res.status(404).json({ error: "Order not found" });
-    } else {
-      res.status(200).json({
-        message: `Order Deleted Successfully`,
-      });
-    }
+    await confirmmodel.deleteConfirmedOrder(id);
+    res.status(200).json({
+      message: `Order Deleted Successfully`,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send(`Failed to delete Order, Internal Server Error`);
+    res.status(404).json({ message: err.message });
+  }
+};
+
+// --------------------------------------------------- confirm order history ----------------------------------------------------
+
+exports.getHistory = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await confirmmodel.getConfirmHistory(id);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ message: err.message });
   }
 };

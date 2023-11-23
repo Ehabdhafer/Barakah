@@ -1,12 +1,35 @@
-const db = require("../models/db");
+const donationmodel = require("../models/donation_model");
 
-// --------------------------------------------------get all donation --------------------------------------
+// --------------------------------------------------get not expired donation --------------------------------------
 
 exports.getdonation = async (req, res) => {
   try {
-    const query = `select * from donation where is_deleted = false`;
-    const result = await db.query(query);
-    res.json(result.rows);
+    const result = await donationmodel.getDonation();
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// --------------------------------------------------get not expired donation --------------------------------------
+
+exports.getnotexpireddonation = async (req, res) => {
+  try {
+    const result = await donationmodel.getNotExpiredDonation();
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// --------------------------------------------------get expired donation --------------------------------------
+
+exports.getexpireddonation = async (req, res) => {
+  try {
+    const result = await donationmodel.getExpiredDonation();
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
@@ -15,31 +38,58 @@ exports.getdonation = async (req, res) => {
 
 // --------------------------------------------------post donation --------------------------------------
 
+const bucket = require("../middleware/firebase.js");
+
 exports.postdonation = async (req, res) => {
-  const { type, details, city, expiry_date, price, user_id, qty } = req.body;
+  const {
+    type,
+    details,
+    city,
+    expiry_date,
+    qty,
+    free,
+    expired,
+    additionalnotes,
+  } = req.body;
+  // The user _id is available from the decoded JWT token
+  const user_id = req.user.user_id;
   try {
-    const query = `insert into donation (type, details, city, date, time, expiry_date, price, user_id,qty)
-    values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-    `;
-    const date = new Date();
-    const time = new Date().toLocaleTimeString("en-US", {
-      hour12: false,
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: "No file provided" });
+    }
+
+    const fileName = ` ${Date.now()}_${file.originalname}`;
+    const fileBuffer = file.buffer;
+
+    // Upload to Firebase Storage
+    const fileUpload = bucket.bucket.file(fileName); // Make sure "bucket" is defined
+    const blobStream = fileUpload.createWriteStream();
+
+    blobStream.on("finish", async () => {
+      // The file has been uploaded
+      const imageurl = `https://firebasestorage.googleapis.com/v0/b/${
+        bucket.bucket.name
+      }/o/${encodeURIComponent(fileUpload.name)}?alt=media`;
+
+      await donationmodel.postDonation(
+        type,
+        details,
+        city,
+        expiry_date,
+        qty,
+        user_id,
+        free,
+        expired,
+        additionalnotes,
+        imageurl
+      );
+      res.status(200).json({
+        message: `Donation Created Sucessfully`,
+      });
     });
-    values = [
-      type,
-      details,
-      city,
-      date,
-      time,
-      expiry_date,
-      price,
-      user_id,
-      qty,
-    ];
-    await db.query(query, values);
-    res.status(200).json({
-      message: `Donation Created Sucessfully`,
-    });
+    blobStream.end(fileBuffer);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
@@ -49,46 +99,37 @@ exports.postdonation = async (req, res) => {
 // --------------------------------------------------post donation for business --------------------------------------
 
 exports.postdonationbusiness = async (req, res) => {
-  const { type, details, city, expiry_date, price, user_id, qty } = req.body;
+  const {
+    type,
+    details,
+    city,
+    expiry_date,
+    price,
+    qty,
+    free,
+    expired,
+    additionalnotes,
+  } = req.body;
+  const user_id = req.user.user_id;
   try {
-    const subscriptionQuery =
-      "SELECT subscription FROM users WHERE user_id = $1 and role_id = 2";
-    const subscriptionResult = await db.query(subscriptionQuery, [user_id]);
-
-    if (
-      subscriptionResult.rows.length > 0 &&
-      subscriptionResult.rows[0].subscription
-    ) {
-      const query = `insert into donation (type, details, city, date, time, expiry_date, price, user_id,qty)
-    values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-    `;
-      const date = new Date();
-      const time = new Date().toLocaleTimeString("en-US", {
-        hour12: false,
-      });
-      values = [
-        type,
-        details,
-        city,
-        date,
-        time,
-        expiry_date,
-        price,
-        user_id,
-        qty,
-      ];
-      await db.query(query, values);
-      res.status(200).json({
-        message: `Donation Created Sucessfully`,
-      });
-    } else {
-      res.status(404).json({
-        message: "User is not subscribed. Cannot post a new donation.",
-      });
-    }
+    await donationmodel.postDonationBusiness(
+      type,
+      details,
+      city,
+      expiry_date,
+      price,
+      qty,
+      user_id,
+      free,
+      expired,
+      additionalnotes
+    );
+    res.status(200).json({
+      message: `Donation Created Sucessfully`,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(404).json({ message: err.message });
   }
 };
 
@@ -97,18 +138,11 @@ exports.postdonationbusiness = async (req, res) => {
 exports.getdonationid = async (req, res) => {
   const { id } = req.params;
   try {
-    const donation = await db.query(
-      `select * from donation where donation_id = $1 and is_deleted = false`,
-      [id]
-    );
-    if (!donation.rowCount) {
-      return res.status(404).json({ error: "Donation not found" });
-    } else {
-      res.json(donation.rows);
-    }
+    const donation = await donationmodel.getDonationById(id);
+    res.json(donation);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(404).json({ message: err.message });
   }
 };
 
@@ -118,20 +152,21 @@ exports.updatedonation = async (req, res) => {
   const { id } = req.params;
   const { type, details, city, expiry_date, price, qty } = req.body;
   try {
-    const query = `update donation set type=$1, details=$2, city=$3, expiry_date=$4,
-    price=$5, qty=$6 where donation_id=$7 and is_deleted = false`;
-    values = [type, details, city, expiry_date, price, qty, id];
-    const donation = await db.query(query, values);
-    if (!donation.rowCount) {
-      return res.status(404).json({ error: "Donation not found" });
-    } else {
-      res.status(200).json({
-        message: `Donation Updated Successfully`,
-      });
-    }
+    await donationmodel.updateDonation(
+      id,
+      type,
+      details,
+      city,
+      expiry_date,
+      price,
+      qty
+    );
+    res.status(200).json({
+      message: `Donation Updated Successfully`,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(404).json({ message: err.message });
   }
 };
 
@@ -140,18 +175,13 @@ exports.updatedonation = async (req, res) => {
 exports.deletedonation = async (req, res) => {
   const { id } = req.params;
   try {
-    const query = `update donation set is_deleted = true where donation_id =$1`;
-    const donation = await db.query(query, [id]);
-    if (!donation.rowCount) {
-      return res.status(404).json({ error: "Donation not found" });
-    } else {
-      res.status(200).json({
-        message: `Donation Deleted Successfully`,
-      });
-    }
+    await donationmodel.deleteDonation(id);
+    res.status(200).json({
+      message: `Donation Deleted Successfully`,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send(`Failed to delete donation, Internal Server Error`);
+    res.status(404).json({ message: err.message });
   }
 };
 
@@ -159,9 +189,8 @@ exports.deletedonation = async (req, res) => {
 
 exports.countdonation = async (req, res) => {
   try {
-    const query = `select count(*) from donation where is_deleted = false`;
-    const result = await db.query(query);
-    res.json(result.rows);
+    const result = await donationmodel.countDonation();
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });

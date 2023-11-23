@@ -36,7 +36,7 @@ exports.protected =
           const payload = {
             username: username,
             email: email,
-            role: emailCheck.rows[0].user_role,
+            role_id: emailCheck.rows[0].role_id,
             user_id: emailCheck.rows[0].user_id,
           };
 
