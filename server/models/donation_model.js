@@ -5,7 +5,14 @@ module.exports = {
   getDonation: async () => {
     const query = `select * from donation 
     inner join users on donation.user_id = users.user_id
-    where donation.is_deleted = false`;
+    where donation.is_deleted = false and donation.status = 'approved' `;
+    const result = await db.query(query);
+    return result.rows;
+  },
+  getadminDonation: async () => {
+    const query = `select * from donation 
+    inner join users on donation.user_id = users.user_id
+    where donation.is_deleted = false and donation.status = 'pending' `;
     const result = await db.query(query);
     return result.rows;
   },
@@ -40,7 +47,7 @@ module.exports = {
     additionalnotes,
     imageurl
   ) => {
-    const query = `insert into donation (type, details, city, date, time, expiry_date, user_id, qty,free,expired,additionalnotes,imageUrl)
+    const query = `insert into donation (type, details, city, date, time, expiry_date, user_id, qty,free,expired,additionalnotes,imageurl)
     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
     `;
     const date = new Date();
@@ -74,7 +81,8 @@ module.exports = {
     user_id,
     free,
     expired,
-    additionalnotes
+    additionalnotes,
+    imageurl
   ) => {
     const subscriptionQuery = `SELECT subscription FROM users WHERE user_id = $1 `;
     const subscriptionResult = await db.query(subscriptionQuery, [user_id]);
@@ -83,8 +91,8 @@ module.exports = {
       subscriptionResult.rows.length > 0 &&
       subscriptionResult.rows[0].subscription
     ) {
-      const query = `insert into donation (type, details, city, date, time, expiry_date, price, user_id, qty,free,expired,additionalnotes)
-    values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      const query = `insert into donation (type, details, city, date, time, expiry_date, price, user_id, qty,free,expired,additionalnotes,imageurl)
+    values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
     `;
       const date = new Date();
       const time = new Date().toLocaleTimeString("en-US", {
@@ -103,6 +111,57 @@ module.exports = {
         free,
         expired,
         additionalnotes,
+        imageurl,
+      ];
+      await db.query(query, values);
+    } else {
+      throw new Error("User is not subscribed. Cannot post a new donation.");
+    }
+  },
+
+  repostDonation: async (
+    type,
+    details,
+    city,
+    expiry_date,
+    price,
+    qty,
+    user_id,
+    free,
+    expired,
+    additionalnotes,
+    imageurl
+  ) => {
+    const subscriptionQuery = `SELECT subscription FROM users WHERE user_id = $1 `;
+    const subscriptionResult = await db.query(subscriptionQuery, [user_id]);
+
+    if (
+      subscriptionResult.rows.length > 0 &&
+      subscriptionResult.rows[0].subscription
+    ) {
+      const query = `insert into donation (type, details, city, date, time, expiry_date, price, user_id, qty,free,expired,additionalnotes,imageurl,status)
+    values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+    `;
+      const status = "approved";
+      const date = new Date();
+      const time = new Date().toLocaleTimeString("en-US", {
+        hour12: false,
+      });
+      const values = [
+        type,
+        details,
+        city,
+        date,
+        time,
+        expiry_date,
+        price,
+        user_id,
+        qty,
+        free,
+        expired,
+        additionalnotes,
+        imageurl,
+        status,
       ];
       await db.query(query, values);
     } else {
@@ -112,7 +171,9 @@ module.exports = {
 
   getDonationById: async (id) => {
     const donation = await db.query(
-      `select * from donation where donation_id = $1 and is_deleted = false`,
+      `select * from donation 
+      inner join users on donation.user_id = users.user_id 
+      where donation_id = $1 and donation.is_deleted = false`,
       [id]
     );
     if (!donation.rowCount) {
@@ -122,10 +183,31 @@ module.exports = {
     }
   },
 
-  updateDonation: async (id, type, details, city, expiry_date, price, qty) => {
-    const query = `update donation set type=$1, details=$2, city=$3, expiry_date=$4,
-    price=$5, qty=$6 where donation_id=$7 and is_deleted = false`;
-    const values = [type, details, city, expiry_date, price, qty, id];
+  updateDonation: async (
+    id,
+    type,
+    details,
+    city,
+    expiry_date,
+    price,
+    qty,
+    additionalnotes,
+    imageurl
+  ) => {
+    const query = `update donation set type=COALESCE($1,type), details=COALESCE($2,details), city=COALESCE($3,city),
+     expiry_date=COALESCE($4,expiry_date),price=COALESCE($5,price), qty=COALESCE($6,qty), additionalnotes=COALESCE($8,additionalnotes), 
+     imageurl=COALESCE($9,imageurl) where donation_id=$7 and is_deleted = false`;
+    const values = [
+      type,
+      details,
+      city,
+      expiry_date,
+      price,
+      qty,
+      id,
+      additionalnotes,
+      imageurl,
+    ];
     const donation = await db.query(query, values);
     if (!donation.rowCount) {
       throw new Error("Donation not found");
@@ -144,5 +226,19 @@ module.exports = {
     const query = `select count(*) from donation where is_deleted = false`;
     const result = await db.query(query);
     return result.rows;
+  },
+  approveDonation: async (id) => {
+    const query = `update donation set status = 'approved' where donation_id =$1`;
+    const donation = await db.query(query, [id]);
+    if (!donation.rowCount) {
+      throw new Error("Donation not found");
+    }
+  },
+  rejectDonation: async (id) => {
+    const query = `update donation set is_deleted = true , status = 'rejected' where donation_id =$1`;
+    const donation = await db.query(query, [id]);
+    if (!donation.rowCount) {
+      throw new Error("Donation not found");
+    }
   },
 };

@@ -111,7 +111,7 @@ const Details = () => {
 
           <div className="mb-10 text-blue">
             <span className="text-blue font-bold block">Additional Notes:</span>{" "}
-            {postDetails.additionalNotes}
+            {postDetails.additionalnotes}
           </div>
 
           <div className="flex">

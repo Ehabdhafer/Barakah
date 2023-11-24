@@ -29,11 +29,11 @@ module.exports = {
   getOrderByUserId: async (id) => {
     try {
       const result = await db.query(
-        `select users.username, users.industry, donation.type
-        from users
-        inner join donation on users.user_id = donation.user_id
-        inner join orders on orders.donation_id = donation.donation_id
-        where orders.is_deleted = false and donation.user_id =$1`,
+        `select users.username,users.industry,donation.type, orders.order_id
+      FROM orders
+      INNER JOIN donation ON orders.donation_id = donation.donation_id
+      INNER JOIN users ON orders.user_id = users.user_id
+      where orders.is_deleted = false and donation.user_id =$1 and donation.is_deleted = false`,
         [id]
       );
       if (!result.rowCount) {
@@ -44,22 +44,6 @@ module.exports = {
       throw err;
     }
   },
-  // getOrderByUserId: async (id) => {
-  //   try {
-  //     const result = await db.query(
-  //       `select * from orders inner join
-  //       donation on orders.donation_id = donation.donation_id
-  //       where orders.is_deleted = false and orders.user_id =$1`,
-  //       [id]
-  //     );
-  //     if (!result.rowCount) {
-  //       throw new Error("Order not found");
-  //     }
-  //     return result.rows;
-  //   } catch (err) {
-  //     throw err;
-  //   }
-  // },
 
   updateOrder: async (id, order_city, phone) => {
     try {
@@ -82,23 +66,6 @@ module.exports = {
       if (!result.rowCount) {
         throw new Error("Order not found");
       }
-    } catch (err) {
-      throw err;
-    }
-  },
-
-  getOrderHistory: async (id) => {
-    try {
-      const result = await db.query(
-        `select * from orders inner join 
-        donation on orders.donation_id = donation.donation_id
-        where orders.is_deleted = true and orders.user_id =$1`,
-        [id]
-      );
-      if (!result.rowCount) {
-        throw new Error("Order not found");
-      }
-      return result.rows;
     } catch (err) {
       throw err;
     }

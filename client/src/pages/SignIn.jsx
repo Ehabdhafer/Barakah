@@ -116,7 +116,10 @@ const SignIn = () => {
                 Sign In
               </button>
 
-              <div className="text-center mt-4">
+              
+            </div>
+          </form>
+          <div className="text-center mt-4">
                 <div className="font-medium mb-4">or </div>
                 <button className="bg-transparent border border-blue text-blue py-2 px-8  text-md font-semibold" onClick={handleGoogleSignin}>
                   Sign In with Google
@@ -130,8 +133,6 @@ const SignIn = () => {
                   <button className="font-bold">Sign Up</button>
                 </Link>
               </div>
-            </div>
-          </form>
         </div>{" "}
       </div>{" "}
     </div>

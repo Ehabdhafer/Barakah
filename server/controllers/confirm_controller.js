@@ -3,9 +3,16 @@ const confirmmodel = require("../models/confirm_model");
 // --------------------------------------------------post confirm order --------------------------------------
 
 exports.postconfirm = async (req, res) => {
-  const { order_id } = req.body;
+  const user_iddonation = req.user.user_id;
+  const { order_id, accept_location, phone, collectionTime } = req.body;
   try {
-    await confirmmodel.postConfirmOrder(order_id);
+    await confirmmodel.postConfirmOrder(
+      order_id,
+      accept_location,
+      phone,
+      user_iddonation,
+      collectionTime
+    );
     res.status(200).json({
       message: `Order Confirmed Successfully`,
     });
@@ -58,9 +65,9 @@ exports.deleteconfirm = async (req, res) => {
 // --------------------------------------------------- confirm order history ----------------------------------------------------
 
 exports.getHistory = async (req, res) => {
-  const { id } = req.params;
+  const user_id = req.user.user_id;
   try {
-    const result = await confirmmodel.getConfirmHistory(id);
+    const result = await confirmmodel.getConfirmHistory(user_id);
     res.json(result);
   } catch (err) {
     console.error(err);

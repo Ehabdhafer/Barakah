@@ -20,6 +20,6 @@ router.get(
 );
 router.put("/updateorder/:id", orderController.updateorder);
 router.put("/deleteorder/:id", orderController.deleteorder);
-router.get("/getorderhistory/:id", orderController.getorderhistory);
+// router.get("/getorderhistory/:id", orderController.getorderhistory);
 
 module.exports = router;

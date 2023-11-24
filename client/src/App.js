@@ -10,6 +10,7 @@ import Details from "./pages/Details";
 import Filter from "./pages/Filter";
 import { AuthProvider } from "./hooks/Authcontext";
 import Profile from "./pages/Profile";
+import Contactus from "./pages/Contactus";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route exact path="/donations" element={<Filter />}></Route>
           <Route exact path="/details/:id" element={<Details />}></Route>
           <Route exact path="/profile" element={<Profile />}></Route>
+          <Route exact path="/contactus" element={<Contactus />}></Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -56,7 +56,8 @@ module.exports = {
 
       const newpassword = await bcrypt.hash(password, 10);
 
-      const updateQuery = `UPDATE users SET username = $2, email = $3, phone = $4, city = $5, password = $6
+      const updateQuery = `UPDATE users SET username = COALESCE($2,username), email = COALESCE($3,email), phone = COALESCE($4,phone),
+         city = COALESCE($5,city), password = COALESCE($6,password)
      WHERE user_id = $1 AND is_deleted = false RETURNING user_id`;
 
       await db.query(updateQuery, [

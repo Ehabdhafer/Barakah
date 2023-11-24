@@ -75,13 +75,13 @@ exports.deleteorder = async (req, res) => {
 
 // ------------------------------------------------- Order History ----------------------------
 
-exports.getorderhistory = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await ordermodel.getOrderHistory(id);
-    res.json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(404).json({ message: err.message });
-  }
-};
+// exports.getorderhistory = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+// const result = await ordermodel.getOrderHistory(id);
+//     res.json(result);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(404).json({ message: err.message });
+//   }
+// };
