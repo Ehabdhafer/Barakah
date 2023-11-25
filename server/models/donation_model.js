@@ -241,4 +241,12 @@ module.exports = {
       throw new Error("Donation not found");
     }
   },
+  sortdateDonation: async () => {
+    const query = `select * from donation 
+    inner join users on donation.user_id = users.user_id
+    where donation.is_deleted = false and donation.status = 'approved'
+	  order by date DESC  `;
+    const result = await db.query(query);
+    return result.rows;
+  },
 };

@@ -4,8 +4,13 @@ const bcrypt = require("bcrypt");
 module.exports = {
   getUserDetails: async () => {
     try {
+      if (page <= 0 || limit <= 0) {
+        throw new Error("Invalid page or limit parameter");
+      }
+      const offset = (page - 1) * limit;
       const user = await db.query(
-        `select * from users where is_deleted = false`
+        `SELECT * FROM users WHERE is_deleted = false order by user_id LIMIT $1 OFFSET $2 `,
+        [limit, offset]
       );
       return user.rows;
     } catch (err) {
@@ -32,7 +37,8 @@ module.exports = {
     phone,
     city,
     oldpassword,
-    password
+    password,
+    imageurl
   ) => {
     try {
       const storedUser = await db.query(
@@ -40,34 +46,50 @@ module.exports = {
         [user_id]
       );
 
-      if (!storedUser.rows.length) {
-        throw new Error("User not found");
+      if (password) {
+        const storedHashedPassword = storedUser.rows[0].password;
+        const matched_password = await bcrypt.compare(
+          oldpassword,
+          storedHashedPassword
+        );
+
+        if (!matched_password) {
+          throw new Error("Old password is incorrect");
+        }
+
+        const hashedNewPassword = await bcrypt.hash(password, 10);
+
+        updateQuery = `UPDATE users SET 
+          username = COALESCE($2, username),
+          email = COALESCE($3, email),
+          phone = COALESCE($4, phone),
+          city = COALESCE($5, city),
+          password = COALESCE($6, password),
+          imageurl = COALESCE($7, imageurl)
+          WHERE user_id = $1 AND is_deleted = false RETURNING user_id`;
+
+        params = [
+          user_id,
+          username,
+          email,
+          phone,
+          city,
+          hashedNewPassword,
+          imageurl,
+        ];
+      } else {
+        updateQuery = `UPDATE users SET 
+          username = COALESCE($2, username),
+          email = COALESCE($3, email),
+          phone = COALESCE($4, phone),
+          city = COALESCE($5, city),
+          imageurl = COALESCE($6, imageurl)
+          WHERE user_id = $1 AND is_deleted = false RETURNING user_id`;
+
+        params = [user_id, username, email, phone, city, imageurl];
       }
 
-      const storedHashedPassword = storedUser.rows[0].password;
-      const matched_password = await bcrypt.compare(
-        oldpassword,
-        storedHashedPassword
-      );
-
-      if (!matched_password) {
-        throw new Error("Old password is incorrect");
-      }
-
-      const newpassword = await bcrypt.hash(password, 10);
-
-      const updateQuery = `UPDATE users SET username = COALESCE($2,username), email = COALESCE($3,email), phone = COALESCE($4,phone),
-         city = COALESCE($5,city), password = COALESCE($6,password)
-     WHERE user_id = $1 AND is_deleted = false RETURNING user_id`;
-
-      await db.query(updateQuery, [
-        user_id,
-        username,
-        email,
-        phone,
-        city,
-        newpassword,
-      ]);
+      await db.query(updateQuery, params);
 
       return { message: "User details updated successfully" };
     } catch (err) {

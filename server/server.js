@@ -6,9 +6,6 @@ app.use(express.json());
 var cors = require("cors");
 app.use(cors());
 
-const bodyParser = require("body-parser");
-const path = require("path");
-
 app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());

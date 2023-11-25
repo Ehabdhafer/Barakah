@@ -55,7 +55,7 @@ const History = () => {
               <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                 {food.type}
               </td>
-              <td className="px-6 py-4">{food.expiry_date}</td>
+              <td className="px-6 py-4">{food.date}</td>
               <td className="px-6 py-4 text-center space-x-3">
                 <button
                   className="font-medium bg-blue text-white p-2 shadow-md hover:underline"

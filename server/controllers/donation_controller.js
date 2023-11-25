@@ -1,5 +1,5 @@
 const donationmodel = require("../models/donation_model");
-const bucket = require("../middleware/firebase.js");
+const firebase = require("../middleware/firebase.js");
 
 // --------------------------------------------------get approved donation --------------------------------------
 
@@ -65,41 +65,29 @@ exports.postdonation = async (req, res) => {
   const user_id = req.user.user_id;
   try {
     const file = req.file;
+    if (file) {
+      const fileName = `${Date.now()}_${file.originalname}`;
 
-    if (!file) {
-      return res.status(400).json({ error: "No file provided" });
+      const fileurl = await firebase.uploadFileToFirebase(file, fileName);
+
+      req.body.imageurl = fileurl;
     }
 
-    const fileName = ` ${Date.now()}_${file.originalname}`;
-    const fileBuffer = file.buffer;
-
-    // Upload to Firebase Storage
-    const fileUpload = bucket.bucket.file(fileName); // Make sure "bucket" is defined
-    const blobStream = fileUpload.createWriteStream();
-
-    blobStream.on("finish", async () => {
-      // The file has been uploaded
-      const imageurl = `https://firebasestorage.googleapis.com/v0/b/${
-        bucket.bucket.name
-      }/o/${encodeURIComponent(fileUpload.name)}?alt=media`;
-
-      await donationmodel.postDonation(
-        type,
-        details,
-        city,
-        expiry_date,
-        qty,
-        user_id,
-        free,
-        expired,
-        additionalnotes,
-        imageurl
-      );
-      res.status(200).json({
-        message: `Donation Created Sucessfully`,
-      });
+    await donationmodel.postDonation(
+      type,
+      details,
+      city,
+      expiry_date,
+      qty,
+      user_id,
+      free,
+      expired,
+      additionalnotes,
+      req.body.imageurl
+    );
+    res.status(200).json({
+      message: `Donation Created Sucessfully`,
     });
-    blobStream.end(fileBuffer);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
@@ -123,41 +111,29 @@ exports.postdonationbusiness = async (req, res) => {
   const user_id = req.user.user_id;
   try {
     const file = req.file;
+    if (file) {
+      const fileName = `${Date.now()}_${file.originalname}`;
 
-    if (!file) {
-      return res.status(400).json({ error: "No file provided" });
+      const fileurl = await firebase.uploadFileToFirebase(file, fileName);
+
+      req.body.imageurl = fileurl;
     }
-
-    const fileName = ` ${Date.now()}_${file.originalname}`;
-    const fileBuffer = file.buffer;
-
-    // Upload to Firebase Storage
-    const fileUpload = bucket.bucket.file(fileName); // Make sure "bucket" is defined
-    const blobStream = fileUpload.createWriteStream();
-
-    blobStream.on("finish", async () => {
-      // The file has been uploaded
-      const imageurl = `https://firebasestorage.googleapis.com/v0/b/${
-        bucket.bucket.name
-      }/o/${encodeURIComponent(fileUpload.name)}?alt=media`;
-      await donationmodel.postDonationBusiness(
-        type,
-        details,
-        city,
-        expiry_date,
-        price,
-        qty,
-        user_id,
-        free,
-        expired,
-        additionalnotes,
-        imageurl
-      );
-      res.status(200).json({
-        message: `Donation Created Sucessfully`,
-      });
+    await donationmodel.postDonationBusiness(
+      type,
+      details,
+      city,
+      expiry_date,
+      price,
+      qty,
+      user_id,
+      free,
+      expired,
+      additionalnotes,
+      req.body.imageurl
+    );
+    res.status(200).json({
+      message: `Donation Created Sucessfully`,
     });
-    blobStream.end(fileBuffer);
   } catch (err) {
     console.error(err);
     res.status(404).json({ message: err.message });
@@ -180,41 +156,29 @@ exports.repostDonation = async (req, res) => {
   const user_id = req.user.user_id;
   try {
     const file = req.file;
+    if (file) {
+      const fileName = `${Date.now()}_${file.originalname}`;
 
-    if (!file) {
-      return res.status(400).json({ error: "No file provided" });
+      const fileurl = await firebase.uploadFileToFirebase(file, fileName);
+
+      req.body.imageurl = fileurl;
     }
-
-    const fileName = ` ${Date.now()}_${file.originalname}`;
-    const fileBuffer = file.buffer;
-
-    // Upload to Firebase Storage
-    const fileUpload = bucket.bucket.file(fileName); // Make sure "bucket" is defined
-    const blobStream = fileUpload.createWriteStream();
-
-    blobStream.on("finish", async () => {
-      // The file has been uploaded
-      const imageurl = `https://firebasestorage.googleapis.com/v0/b/${
-        bucket.bucket.name
-      }/o/${encodeURIComponent(fileUpload.name)}?alt=media`;
-      await donationmodel.repostDonation(
-        type,
-        details,
-        city,
-        expiry_date,
-        price,
-        qty,
-        user_id,
-        free,
-        expired,
-        additionalnotes,
-        imageurl
-      );
-      res.status(200).json({
-        message: `Donation Reposted Sucessfully`,
-      });
+    await donationmodel.repostDonation(
+      type,
+      details,
+      city,
+      expiry_date,
+      price,
+      qty,
+      user_id,
+      free,
+      expired,
+      additionalnotes,
+      req.body.imageurl
+    );
+    res.status(200).json({
+      message: `Donation Reposted Sucessfully`,
     });
-    blobStream.end(fileBuffer);
   } catch (err) {
     console.error(err);
     res.status(404).json({ message: err.message });
@@ -242,39 +206,27 @@ exports.updatedonation = async (req, res) => {
     req.body;
   try {
     const file = req.file;
+    if (file) {
+      const fileName = `${Date.now()}_${file.originalname}`;
 
-    if (!file) {
-      return res.status(400).json({ error: "No file provided" });
+      const fileurl = await firebase.uploadFileToFirebase(file, fileName);
+
+      req.body.imageurl = fileurl;
     }
-
-    const fileName = ` ${Date.now()}_${file.originalname}`;
-    const fileBuffer = file.buffer;
-
-    // Upload to Firebase Storage
-    const fileUpload = bucket.bucket.file(fileName); // Make sure "bucket" is defined
-    const blobStream = fileUpload.createWriteStream();
-
-    blobStream.on("finish", async () => {
-      // The file has been uploaded
-      const imageurl = `https://firebasestorage.googleapis.com/v0/b/${
-        bucket.bucket.name
-      }/o/${encodeURIComponent(fileUpload.name)}?alt=media`;
-      await donationmodel.updateDonation(
-        id,
-        type,
-        details,
-        city,
-        expiry_date,
-        price,
-        qty,
-        additionalnotes,
-        imageurl
-      );
-      res.status(200).json({
-        message: `Donation Updated Successfully`,
-      });
+    await donationmodel.updateDonation(
+      id,
+      type,
+      details,
+      city,
+      expiry_date,
+      price,
+      qty,
+      additionalnotes,
+      req.body.imageurl
+    );
+    res.status(200).json({
+      message: `Donation Updated Successfully`,
     });
-    blobStream.end(fileBuffer);
   } catch (err) {
     console.error(err);
     res.status(404).json({ message: err.message });
@@ -335,5 +287,17 @@ exports.rejectDonation = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(404).json({ message: err.message });
+  }
+};
+
+// --------------------------------------------------get donation by date --------------------------------------
+
+exports.sortdateDonation = async (req, res) => {
+  try {
+    const result = await donationmodel.sortdateDonation();
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

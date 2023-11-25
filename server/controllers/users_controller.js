@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 require("dotenv").config();
 // const crypto = require("crypto");
 const Joi = require("joi");
+const firebase = require("../middleware/firebase.js");
 
 // const secretKey1 = crypto.randomBytes(32).toString("hex");
 // console.log(secretKey1);
@@ -119,7 +120,15 @@ exports.loginUser = async (req, res) => {
 // ----------------------------------------------------------------all user details-----------------------------------------------
 exports.getUserDetails = async (req, res) => {
   try {
-    const userDetails = await userModel.getUserDetails();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+      throw new Error("Invalid page or limit parameter");
+    }
+    console.log("page", req.query);
+    console.log("limit", limit);
+    const userDetails = await userModel.getUserDetails(page, limit);
     res.json(userDetails);
   } catch (err) {
     console.error(err.message);
@@ -128,7 +137,7 @@ exports.getUserDetails = async (req, res) => {
 };
 // ----------------------------------------------------------------selected user details-----------------------------------------------
 exports.getuserinfo = async (req, res) => {
-  const { user_id } = req.params;
+  const user_id = req.user.user_id;
   try {
     const userInfo = await userModel.getUserInfo(user_id);
     res.json(userInfo);
@@ -141,24 +150,30 @@ exports.getuserinfo = async (req, res) => {
 // ---------------------------------------------------------------- update user info --------------------------------------------
 
 exports.update_user = async (req, res) => {
-  const { user_id } = req.params;
+  const user_id = req.user.user_id;
   const { username, email, phone, city, oldpassword, password } = req.body;
 
   try {
+    const file = req.file;
+    if (file) {
+      const fileName = `${Date.now()}_${file.originalname}`;
+
+      const fileurl = await firebase.uploadFileToFirebase(file, fileName);
+
+      req.body.imageurl = fileurl;
+    }
     const schema = Joi.object({
-      username: Joi.string().min(3).max(20).required(),
+      username: Joi.string().min(3).max(20),
       email: Joi.string().email({
         minDomainSegments: 2,
         tlds: { allow: ["com", "net"] },
       }),
       phone: Joi.string().pattern(/^[0-9]{7,12}$/),
-      password: Joi.string()
-        .pattern(
-          new RegExp(
-            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&!])[A-Za-z\\d@#$%^&!]{6,30}$"
-          )
+      password: Joi.string().pattern(
+        new RegExp(
+          "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&!])[A-Za-z\\d@#$%^&!]{6,30}$"
         )
-        .required(),
+      ),
     });
     const validate = schema.validate({
       username,
@@ -176,7 +191,8 @@ exports.update_user = async (req, res) => {
         phone,
         city,
         oldpassword,
-        password
+        password,
+        req.body.imageurl
       );
 
       res.status(200).json(result);
