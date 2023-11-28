@@ -294,7 +294,32 @@ exports.rejectDonation = async (req, res) => {
 
 exports.sortdateDonation = async (req, res) => {
   try {
-    const result = await donationmodel.sortdateDonation();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+      throw new Error("Invalid page or limit parameter");
+    }
+    const result = await donationmodel.sortdateDonation(page, limit);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// --------------------------------------------------get donation by user status --------------------------------------
+
+exports.allDonation = async (req, res) => {
+  const { status } = req.params;
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+      throw new Error("Invalid page or limit parameter");
+    }
+    const result = await donationmodel.allDonation(status, page, limit);
     res.json(result);
   } catch (err) {
     console.error(err);

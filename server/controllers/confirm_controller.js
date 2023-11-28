@@ -74,3 +74,16 @@ exports.getHistory = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
+// --------------------------------------------------- confirm order history by id ----------------------------------------------------
+
+exports.getHistoryid = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { id } = req.params;
+  try {
+    const result = await confirmmodel.getConfirmHistoryid(user_id, id);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ message: err.message });
+  }
+};

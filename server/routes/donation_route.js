@@ -39,5 +39,6 @@ router.get("/countdonation", donationController.countdonation);
 router.put("/approvedonation/:id", donationController.approvedonation);
 router.put("/rejectDonation/:id", donationController.rejectDonation);
 router.get("/sortdonation", donationController.sortdateDonation);
+router.get("/alldonation/:status", donationController.allDonation);
 
 module.exports = router;

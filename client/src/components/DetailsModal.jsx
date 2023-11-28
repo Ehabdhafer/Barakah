@@ -6,7 +6,7 @@ import swal from "sweetalert";
 import Cookies from "js-cookie"
 
 
-const PostForm = ({ showModal, onClose }) => {
+const PostForm = ({ showModal, onClose,id }) => {
   const [postData, setPostData] = useState([]);
   // console.log(postData[0].type);
 
@@ -16,7 +16,7 @@ const PostForm = ({ showModal, onClose }) => {
         const token = Cookies.get("token");
         axios.defaults.headers.common["Authorization"] = token;
 
-        const response = await axios.get("http://localhost:5000/getconfirmhistory"); // Replace '1' with the actual post ID you want to display
+        const response = await axios.get(`http://localhost:5000/getconfirmhistory/${id}`); // Replace '1' with the actual post ID you want to display
         setPostData(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -26,14 +26,63 @@ const PostForm = ({ showModal, onClose }) => {
     fetchData();
   }, []);
 
-  const handleRepost = () => {
-    Swal.fire({
-      icon: "warning",
-      title: "Warning!",
-      text: "Are you sure you want to repost this post?",
-      confirmButtonText: "Repost",
-    });
-  };
+  const handleRepost = async () => {
+    try {
+      // Prepare the data object with all form details
+      const formData = {
+        type:postData.type,
+        details:postData.details,
+        qty:postData.qty,
+        city:postData.city,
+        expired:postData.expired,
+        expiry_date:postData.expiry_date,
+        free:postData.free,
+        price:postData.price,
+        additionalnotes:postData.additionalnotes,
+        // Add other form fields as needed
+      };
+const token = Cookies.get("token");
+axios.defaults.headers.common["Authorization"] = token;
+      // Make a POST request to your server endpoint with Axios
+      
+      const response = await axios.post(
+        `http://localhost:5000/repostdonation`,
+        formData
+      );
+
+      // Handle the response as needed
+      console.log("Form submission successful:", response.data);
+
+      //   swal({
+      //     title: "Done!",
+      //     text: "Your post will be posted after being verified.",
+      //     icon: "success",
+      //     timer: 10000, // Set the duration in milliseconds
+      //     buttons: true, // Disable the close button
+      //   });
+
+      // Show a sweet alert after successful submission
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Your post will be posted after being verified.",
+      });
+
+      // Close the modal after successful submission
+      onClose();
+    } catch (error) {
+      // Handle errors
+      console.error("Form submission error:", error);
+      alert(error)
+
+      // Show an error sweet alert
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "There was an error submitting the form. Please try again.",
+      });
+
+  }}
 
   return (
     <Modal isOpen={showModal} onRequestClose={onClose}>

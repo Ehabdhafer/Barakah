@@ -59,7 +59,7 @@ const History = () => {
               <td className="px-6 py-4 text-center space-x-3">
                 <button
                   className="font-medium bg-blue text-white p-2 shadow-md hover:underline"
-                  onClick={() => openModal(food)}
+                  onClick={() => openModal(food.donation_id)}
                 >
                   Show Details
                 </button>
@@ -72,7 +72,7 @@ const History = () => {
         <DetailsModal
           showModal={isModalOpen}
           onClose={closeModal}
-          postData={selectedPost}
+          id={selectedPost}
         />
       )}
     </div>

@@ -16,5 +16,10 @@ router.get(
   verify.authorize([1, 2, 3, 4, 5]),
   confirmController.getHistory
 );
+router.get(
+  "/getconfirmhistory/:id",
+  verify.authorize([1, 2, 3, 4, 5]),
+  confirmController.getHistoryid
+);
 
 module.exports = router;

@@ -2,12 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
-    font-family: 'Montserrat', sans-serif;
+* {
+  font-family: "Montserrat", sans-serif;
 }
 
 .parallelogram {
-    width: 800px;
-    height: 500px;
-    transform: skew(-20deg);
-  }
+  width: 800px;
+  height: 500px;
+  transform: skew(-20deg);
+}
+
+/* Hide the default scrollbar */
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+/* For WebKit browsers (e.g., Chrome, Safari) */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 6px;
+}
+
+/* Optional: Add hover styles */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}

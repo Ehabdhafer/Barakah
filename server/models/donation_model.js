@@ -3,7 +3,7 @@ const db = require("./db");
 
 module.exports = {
   getDonation: async () => {
-    const query = `select * from donation 
+    const query = `select * , donation.city from donation 
     inner join users on donation.user_id = users.user_id
     where donation.is_deleted = false and donation.status = 'approved' `;
     const result = await db.query(query);
@@ -241,12 +241,28 @@ module.exports = {
       throw new Error("Donation not found");
     }
   },
-  sortdateDonation: async () => {
+  sortdateDonation: async (page, limit) => {
+    if (page <= 0 || limit <= 0) {
+      throw new Error("Invalid page or limit parameter");
+    }
+    const offset = (page - 1) * limit;
     const query = `select * from donation 
     inner join users on donation.user_id = users.user_id
-    where donation.is_deleted = false and donation.status = 'approved'
-	  order by date DESC  `;
-    const result = await db.query(query);
+    where donation.is_deleted = false 
+	  order by date DESC LIMIT $1 OFFSET $2 `;
+    const result = await db.query(query, [limit, offset]);
+    return result.rows;
+  },
+  allDonation: async (status, page, limit) => {
+    if (page <= 0 || limit <= 0) {
+      throw new Error("Invalid page or limit parameter");
+    }
+    const offset = (page - 1) * limit;
+    const query = `select * from donation 
+    inner join users on donation.user_id = users.user_id
+    where donation.is_deleted = false and donation.status = $1 
+    order by donation.donation_id LIMIT $2 OFFSET $3`;
+    const result = await db.query(query, [status, limit, offset]);
     return result.rows;
   },
 };

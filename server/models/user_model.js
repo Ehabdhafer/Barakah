@@ -2,7 +2,7 @@ const db = require("./db");
 const bcrypt = require("bcrypt");
 
 module.exports = {
-  getUserDetails: async () => {
+  getUserDetails: async (page, limit) => {
     try {
       if (page <= 0 || limit <= 0) {
         throw new Error("Invalid page or limit parameter");
@@ -179,6 +179,11 @@ module.exports = {
     ];
     const user = await db.query(userQuery, values);
 
+    return user.rows[0];
+  },
+  subscribe: async (user_id) => {
+    const userQuery = "update users set subscription = true WHERE user_id = $1";
+    const user = await db.query(userQuery, [user_id]);
     return user.rows[0];
   },
 };

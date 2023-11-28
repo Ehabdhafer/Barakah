@@ -11,13 +11,14 @@ import Filter from "./pages/Filter";
 import { AuthProvider } from "./hooks/Authcontext";
 import Profile from "./pages/Profile";
 import Contactus from "./pages/Contactus";
+import Dashboard from "./Admin/Dashboard";
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <div className="App">
-          <Navbar />
+          {window.location.pathname !== "/dashboard" ? <Navbar /> : <></>}
         </div>
         <Routes>
           <Route exact path="/" element={<Home />}></Route>
@@ -27,6 +28,7 @@ function App() {
           <Route exact path="/details/:id" element={<Details />}></Route>
           <Route exact path="/profile" element={<Profile />}></Route>
           <Route exact path="/contactus" element={<Contactus />}></Route>
+          <Route exact path="/dashboard" element={<Dashboard />}></Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -121,13 +121,11 @@ exports.loginUser = async (req, res) => {
 exports.getUserDetails = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 10;
 
     if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
       throw new Error("Invalid page or limit parameter");
     }
-    console.log("page", req.query);
-    console.log("limit", limit);
     const userDetails = await userModel.getUserDetails(page, limit);
     res.json(userDetails);
   } catch (err) {
