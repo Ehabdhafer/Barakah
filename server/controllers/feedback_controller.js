@@ -15,10 +15,10 @@ exports.getfeedback = async (req, res) => {
 // --------------------------------------------------post feedback --------------------------------------
 
 exports.postfeedback = async (req, res) => {
-  const { message } = req.body;
-  const time = new Date();
+  const user_id = req.user.user_id;
+  const { message, donation_id } = req.body;
   try {
-    await feedbackmodel.postFeedback(message);
+    await feedbackmodel.postFeedback(message, user_id, donation_id);
     res.status(201).json({ message: `Your Message has been sent` });
   } catch (err) {
     console.error(err);

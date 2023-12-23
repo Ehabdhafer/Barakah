@@ -12,10 +12,12 @@ const PostForm = ({ showModal, onClose }) => {
   const [qty, setQuantity] = useState("");
   const [city, setCity] = useState("");
   const [expired, setExpired] = useState(false);
-  const [expiry_date, setExpiryDate] = useState("");
+  const [expiry_date, setExpiryDate] = useState();
   const [free, setFree] = useState(true);
   const [price, setPrice] = useState("");
   const [additionalnotes, setAdditionalNotes] = useState("");
+  const [image, setImage] = useState(null);
+
   
 
   // ... (other form state variables)
@@ -24,18 +26,21 @@ const PostForm = ({ showModal, onClose }) => {
     e.preventDefault();
     try {
       // Prepare the data object with all form details
-      const formData = {
-        type,
-        details,
-        qty,
-        city,
-        expired,
-        expiry_date,
-        free,
-        price,
-        additionalnotes,
-        // Add other form fields as needed
-      };
+      const formData = new FormData();
+      formData.append("type", type);
+      formData.append("details", details);
+      formData.append("qty", qty);
+      formData.append("city", city);
+      formData.append("expired", expired);
+      if (expiry_date !== null) {
+        formData.append("expiry_date", expiry_date);
+      } 
+      formData.append("free", free);
+      formData.append("price", price);
+      formData.append("additionalnotes", additionalnotes);
+      if (image !== null) {
+        formData.append("image", image);
+      } 
 const token = Cookies.get("token");
 axios.defaults.headers.common["Authorization"] = token;
       // Make a POST request to your server endpoint with Axios
@@ -43,7 +48,13 @@ axios.defaults.headers.common["Authorization"] = token;
       
       const response = await axios.post(
         endpoint,
-        formData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            // Authorization: token,
+          },
+        }
       );
 
       // Handle the response as needed
@@ -142,8 +153,16 @@ axios.defaults.headers.common["Authorization"] = token;
               <option value="" disabled>
                 Select a city
               </option>
-              <option value="amman">Amman</option>
-              <option value="zarqa">Zarqa</option>
+                  <option value="Amman">Amman</option>
+                  <option value="Zarqa">Zarqa</option>
+                  <option value="Irbid">Irbid</option>
+                  <option value="AlSalt">AlSalt</option>
+                  <option value="Ajloun">Ajloun</option>
+                  <option value="Aqaba">Aqaba</option>
+                  <option value="Maan">Maan</option>
+                  <option value="Karak">Karak</option>
+                  <option value="Jerash">Jerash</option>
+                  <option value="Altafila">Altafila</option>
               {/* Add more cities as needed */}
             </select>
           </div>
@@ -209,6 +228,18 @@ axios.defaults.headers.common["Authorization"] = token;
               />
             </div>
           )}
+
+          {/* Image file input */}
+<div className="mb-4">
+  <label className="block text-sm font-medium text-gray-600">
+    Upload Image (Optional)
+  </label>
+  <input
+    type="file"
+    onChange={(e) => setImage(e.target.files[0])}
+    className="mt-1 p-2 w-full border border-blue"
+  />
+</div>
 
           {/* Additional notes textarea */}
           <div className="mb-4">

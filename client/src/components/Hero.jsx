@@ -3,6 +3,8 @@ import traingle from "../assets/triangles.png";
 import square from "../assets/div.png";
 import Logo from "../assets/logo.png";
 import "animate.css/animate.min.css";
+import ExploreButton from "./ExploreButton";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -20,12 +22,12 @@ const Hero = () => {
         />
         <div className="">
           <img
-            className="w-[800px] h-[500px] absolute right-0 animate__animated animate__slideInRight "
+            className="w-[60%] h-[500px] absolute right-0 animate__animated animate__slideInRight "
             src={square}
             alt="Intro"
           />
-          <div className="left-[62%] top-[23%]  absolute text-md text-white font-medium w-[29%] text-justify-between animate__animated animate__slideInRight">
-            <div className="text-xl font-bold mb-2">
+          <div className="left-[60%] top-[22%]  absolute text-md text-white font-medium w-[33%] text-justify-between animate__animated animate__slideInRight">
+            <div className="text-2xl font-bold mb-2">
               {" "}
               Welcome to BARAKAH, where we're dedicated to reducing food waste.
             </div>
@@ -35,9 +37,11 @@ const Hero = () => {
               Join us in making each meal count!
             </div>
             <div className="text-center mt-6">
-              <button class="bg-transparent border border-white text-white py-2 px-4 shadow text-md font-semibold hover:bg-white hover:text-blue">
+              {/* <button class="bg-transparent border border-white text-white py-2 px-4 shadow text-md font-semibold hover:bg-white hover:text-blue">
                 Sign Up
-              </button>{" "}
+              </button>{" "} */}
+
+              <ExploreButton />
             </div>
           </div>
         </div>

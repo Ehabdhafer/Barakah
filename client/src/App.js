@@ -12,6 +12,7 @@ import { AuthProvider } from "./hooks/Authcontext";
 import Profile from "./pages/Profile";
 import Contactus from "./pages/Contactus";
 import Dashboard from "./Admin/Dashboard";
+import Subscription from "./components/Subscription";
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
           <Route exact path="/profile" element={<Profile />}></Route>
           <Route exact path="/contactus" element={<Contactus />}></Route>
           <Route exact path="/dashboard" element={<Dashboard />}></Route>
+
+          <Route exact path="/Subscription" element={<Subscription />}></Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

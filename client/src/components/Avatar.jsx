@@ -30,8 +30,9 @@ const ProfileAvatar = ({ oldProfileImage, username }) => {
         // Update the state with the new profile image URL
         setAvatarImage(response.data.profileImage);
         console.log("Profile image updated successfully!");
-        window.location.reload();
-
+        setTimeout(() => {
+          window.location.reload();
+        }, 200); 
       } else {
         console.log("No new image selected.");
       }

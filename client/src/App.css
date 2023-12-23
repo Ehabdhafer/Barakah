@@ -29,3 +29,29 @@
 .card-container:hover {
   transform: scale(0.97); /* Scale the card on hover */
 }
+
+
+.explore-button {
+  position: relative;
+  animation: moveUpDown 2s infinite linear;
+}
+
+.arrow {
+  position: absolute;
+  font-size: 28px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: transform 0.5s ease-in-out;
+}
+
+@keyframes moveUpDown {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+

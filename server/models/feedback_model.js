@@ -11,12 +11,12 @@ module.exports = {
     }
   },
 
-  postFeedback: async (message) => {
+  postFeedback: async (message, user_id, donation_id) => {
     try {
       const time = new Date();
-      const query = `insert into feedback (message, created_at)
-        values ($1, $2)`;
-      const values = [message, time];
+      const query = `insert into feedback (message, created_at, user_id, donation_id)
+        values ($1, $2, $3, $4)`;
+      const values = [message, time, user_id, donation_id];
       await db.query(query, values);
     } catch (err) {
       throw err;

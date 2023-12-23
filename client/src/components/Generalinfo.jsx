@@ -81,7 +81,9 @@ const Generalinfo = ({ initialData }) => {
 
         // Handle success (you can customize this part based on your API response)
         swal("Done!", "Profile updated successfully", "success");
-        navigate("/");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500); 
       } catch (error) {
         // Handle error (you can customize this part based on your API error handling)
         // swal("Error!", error, "success");
@@ -167,8 +169,16 @@ const Generalinfo = ({ initialData }) => {
                   className="block w-full p-2 mt-1 border h-10"
                 >
                   {/* Add your city options here */}
-                  <option value="city1">City 1</option>
-                  <option value="city2">City 2</option>
+                  <option value="Amman">Amman</option>
+                  <option value="Zarqa">Zarqa</option>
+                  <option value="Irbid">Irbid</option>
+                  <option value="AlSalt">AlSalt</option>
+                  <option value="Ajloun">Ajloun</option>
+                  <option value="Aqaba">Aqaba</option>
+                  <option value="Maan">Maan</option>
+                  <option value="Karak">Karak</option>
+                  <option value="Jerash">Jerash</option>
+                  <option value="Altafila">Altafila</option>
                   {/* Add more options as needed */}
                 </select>
               </div>

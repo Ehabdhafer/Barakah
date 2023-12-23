@@ -66,11 +66,12 @@ exports.registerUser = async (req, res) => {
         };
 
         const secretKey = process.env.SECRET_KEY;
-        const token = jwt.sign(payload, secretKey, { expiresIn: "1h" });
+        const token = jwt.sign(payload, secretKey, { expiresIn: "6h" });
 
         res.status(201).json({
           message: "User Added Successfully",
           token: token,
+          role_id: user.role_id,
         });
       }
     }
@@ -87,7 +88,7 @@ exports.loginUser = async (req, res) => {
     const user = await userModel.getUserByEmail(email);
 
     if (!user) {
-      res.status(400).json({ error: "Invalid Email" });
+      res.status(400).json({ error: "Invalid Email or Password" });
     } else {
       const storedHashedPassword = user.password;
       const matched_password = await bcrypt.compare(
@@ -95,7 +96,7 @@ exports.loginUser = async (req, res) => {
         storedHashedPassword
       );
       if (!matched_password) {
-        res.status(400).json({ message: "password is invalid" });
+        res.status(400).json({ error: "Invalid Email or Password" });
         return;
       }
       const payload = {
@@ -105,35 +106,103 @@ exports.loginUser = async (req, res) => {
         user_id: user.user_id,
       };
       const secretKey = process.env.SECRET_KEY;
-      const token = jwt.sign(payload, secretKey, { expiresIn: "1h" });
+      const token = jwt.sign(payload, secretKey, { expiresIn: "6h" });
 
-      res.status(200).json({
-        message: "Login Successfully",
-        token: token,
-      });
+      if (user.role_id === 1) {
+        res.status(202).json({
+          message: "Login Successfully",
+          token: token,
+        });
+      } else {
+        res.status(200).json({
+          message: "Login Successfully",
+          token: token,
+          role_id: user.role_id,
+        });
+      }
     }
   } catch (err) {
     console.error(err);
     res.status(500).send("Failed to Authenticate");
   }
 };
+
+// ------------------------------------------------------google Login---------------------------------------------------------
+
+exports.loginUsers = async (req, res) => {
+  try {
+    // console.log("object");
+    const username = req.body.name;
+    const { email, picture } = req.body;
+    // console.log(email);
+
+    const existUser = await userModel.getUserByEmails(email);
+    // console.log(`hhh`, existUser);
+
+    if (existUser) {
+      try {
+        const payload = {
+          username: existUser.username,
+          email: existUser.email,
+          role_id: existUser.role_id,
+          user_id: existUser.user_id,
+        };
+        const secretKey = process.env.SECRET_KEY;
+        const token = jwt.sign(payload, secretKey, { expiresIn: "6h" });
+
+        return res.status(200).json({
+          role_id: existUser.role_id,
+          logmessage: "User logged in successfully",
+          token: token,
+        });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+    } else {
+      const user = await userModel.createUsers({ username, email, picture });
+      console.log(user);
+      const payload = {
+        username: user.username,
+        email: user.email,
+        role_id: user.role_id,
+        user_id: user.user_id,
+      };
+      const secretKey = process.env.SECRET_KEY;
+      const token = jwt.sign(payload, secretKey, { expiresIn: "6h" });
+
+      return res.status(200).json({
+        role_id: user.role_id,
+        logmessage: "User added successfully",
+        token: token,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 // ----------------------------------------------------------------all user details-----------------------------------------------
 exports.getUserDetails = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search;
 
     if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
       throw new Error("Invalid page or limit parameter");
     }
-    const userDetails = await userModel.getUserDetails(page, limit);
+    const userDetails = await userModel.getUserDetails(page, limit, search);
     res.json(userDetails);
   } catch (err) {
     console.error(err.message);
     res.status(500).send(err.message);
   }
 };
+
 // ----------------------------------------------------------------selected user details-----------------------------------------------
+
 exports.getuserinfo = async (req, res) => {
   const user_id = req.user.user_id;
   try {
@@ -236,6 +305,17 @@ exports.countalluser = async (req, res) => {
     res.status(500).send(err.message);
   }
 };
+// --------------------------------------------------count users role -----------------------------------------
+
+exports.countuserrole = async (req, res) => {
+  try {
+    const count = await userModel.countuserrole();
+    res.json(count);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(err.message);
+  }
+};
 
 // --------------------------------------------------update user role ---------------------------------------------
 
@@ -258,5 +338,43 @@ exports.update_userrole = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Failed to update user role");
+  }
+};
+
+// --------------------------------------------------get partners ---------------------------------------------
+
+exports.partners = async (req, res) => {
+  try {
+    const partners = await userModel.partners();
+    res.json(partners);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(`Failed to get partners`);
+  }
+};
+// --------------------------------------------------post partners ---------------------------------------------
+
+exports.postpartners = async (req, res) => {
+  const { user_id } = req.body;
+  try {
+    await userModel.postpartners(user_id);
+    res.status(200).json({
+      message: "partners added successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(`Failed to get partners`);
+  }
+};
+
+// -------------------------------------------------- count user donation -----------------------------------------
+
+exports.countuserdonation = async (req, res) => {
+  try {
+    const count = await userModel.countuserdonation();
+    res.json(count);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(err.message);
   }
 };

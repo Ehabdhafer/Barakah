@@ -94,7 +94,7 @@ const AcceptForm = ({ isOpen, onClose, orderId }) => {
               Collection Time
             </label>
             <input
-              type="text"
+              type="datetime-local"
               value={collectionTime}
               onChange={(e) => setCollectionTime(e.target.value)}
               className="mt-1 p-2 w-full border border-blue"

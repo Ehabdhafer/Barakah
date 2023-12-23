@@ -62,12 +62,24 @@ exports.deleteconfirm = async (req, res) => {
   }
 };
 
-// --------------------------------------------------- confirm order history ----------------------------------------------------
+// --------------------------------------------------- confirm order history donate ----------------------------------------------------
 
-exports.getHistory = async (req, res) => {
+exports.getConfirmHistorydonate = async (req, res) => {
   const user_id = req.user.user_id;
   try {
-    const result = await confirmmodel.getConfirmHistory(user_id);
+    const result = await confirmmodel.getConfirmHistorydonate(user_id);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ message: err.message });
+  }
+};
+// --------------------------------------------------- confirm order history order ----------------------------------------------------
+
+exports.getConfirmHistoryorder = async (req, res) => {
+  const user_id = req.user.user_id;
+  try {
+    const result = await confirmmodel.getConfirmHistoryorder(user_id);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -81,6 +93,60 @@ exports.getHistoryid = async (req, res) => {
   const { id } = req.params;
   try {
     const result = await confirmmodel.getConfirmHistoryid(user_id, id);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ message: err.message });
+  }
+};
+
+// --------------------------------------------------- confirm order history donate by id ----------------------------------------------------
+
+exports.getConfirmHistoryiddonate = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { id } = req.params;
+  try {
+    const result = await confirmmodel.getConfirmHistoryiddonate(user_id, id);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ message: err.message });
+  }
+};
+// --------------------------------------------------- confirm order history order by id ----------------------------------------------------
+
+exports.getConfirmHistoryidorder = async (req, res) => {
+  const user_id = req.user.user_id;
+  const { id } = req.params;
+  try {
+    const result = await confirmmodel.getConfirmHistoryidorder(user_id, id);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ message: err.message });
+  }
+};
+
+// --------------------------------------------------- confirm order history  ----------------------------------------------------
+
+exports.getConfirmHistoryall = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search;
+    const result = await confirmmodel.getConfirmHistoryall(page, limit, search);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ message: err.message });
+  }
+};
+
+// -------------------------------------------------- confirmed orders ----------------------------------------------------------------
+
+exports.countconfirm = async (req, res) => {
+  try {
+    const result = await confirmmodel.countconfirm();
     res.json(result);
   } catch (err) {
     console.error(err);

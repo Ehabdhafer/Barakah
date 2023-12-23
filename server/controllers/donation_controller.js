@@ -28,7 +28,13 @@ exports.getadminDonation = async (req, res) => {
 
 exports.getnotexpireddonation = async (req, res) => {
   try {
-    const result = await donationmodel.getNotExpiredDonation();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+      throw new Error("Invalid page or limit parameter");
+    }
+    const result = await donationmodel.getNotExpiredDonation(page, limit);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -40,7 +46,13 @@ exports.getnotexpireddonation = async (req, res) => {
 
 exports.getexpireddonation = async (req, res) => {
   try {
-    const result = await donationmodel.getExpiredDonation();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+      throw new Error("Invalid page or limit parameter");
+    }
+    const result = await donationmodel.getExpiredDonation(page, limit);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -152,17 +164,10 @@ exports.repostDonation = async (req, res) => {
     free,
     expired,
     additionalnotes,
+    imageurl,
   } = req.body;
   const user_id = req.user.user_id;
   try {
-    const file = req.file;
-    if (file) {
-      const fileName = `${Date.now()}_${file.originalname}`;
-
-      const fileurl = await firebase.uploadFileToFirebase(file, fileName);
-
-      req.body.imageurl = fileurl;
-    }
     await donationmodel.repostDonation(
       type,
       details,
@@ -174,7 +179,7 @@ exports.repostDonation = async (req, res) => {
       free,
       expired,
       additionalnotes,
-      req.body.imageurl
+      imageurl
     );
     res.status(200).json({
       message: `Donation Reposted Sucessfully`,
@@ -296,11 +301,12 @@ exports.sortdateDonation = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search;
 
     if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
       throw new Error("Invalid page or limit parameter");
     }
-    const result = await donationmodel.sortdateDonation(page, limit);
+    const result = await donationmodel.sortdateDonation(page, limit, search);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -324,5 +330,17 @@ exports.allDonation = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// ---------------------------------------------------------------- search donations ----------------------------------------------------
+exports.searchdonation = async (req, res) => {
+  const { search } = req.body;
+  try {
+    const donationsearch = await donationmodel.searchdonation(search);
+    res.json(donationsearch);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(err.message);
   }
 };

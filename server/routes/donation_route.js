@@ -13,18 +13,18 @@ router.get("/getexpireddonation", donationController.getexpireddonation);
 router.post(
   "/postdonation",
   upload.single("image"),
-  verify.authorize([1, 2, 3]),
+  verify.authorize([1, 3]),
   donationController.postdonation
 );
 router.post(
   "/postdonationbusiness",
   upload.single("image"),
-  verify.authorize([1, 2, 3]),
+  verify.authorize([1, 3]),
   donationController.postdonationbusiness
 );
 router.post(
   "/repostdonation",
-  upload.single("image"),
+  // upload.single("image"),
   verify.authorize([1, 2, 3]),
   donationController.repostDonation
 );
@@ -40,5 +40,6 @@ router.put("/approvedonation/:id", donationController.approvedonation);
 router.put("/rejectDonation/:id", donationController.rejectDonation);
 router.get("/sortdonation", donationController.sortdateDonation);
 router.get("/alldonation/:status", donationController.allDonation);
+router.post("/searchdonation", donationController.searchdonation);
 
 module.exports = router;

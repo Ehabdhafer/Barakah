@@ -40,7 +40,8 @@ const Profile = () => {
         {selectedMenuItem && (
           <div>
             {selectedMenuItem === "Requests" && <Requests />}
-            {selectedMenuItem === "History" && <History />}
+            {selectedMenuItem === "History" && <History role={userData[0]?.role_id}/>}
+            {/* {console.log(userData[0]?.role_id)} */}
             {selectedMenuItem === "Settings" && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-1 md:row-span-1">

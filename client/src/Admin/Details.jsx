@@ -11,7 +11,9 @@ const Details = ({ showModal, onClose, id }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/donation/${id}`); // Replace '1' with the actual post ID you want to display
+        const response = await axios.get(
+          `http://localhost:5000/donation/${id}`
+        ); // Replace '1' with the actual post ID you want to display
         setPostData(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);

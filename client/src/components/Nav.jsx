@@ -1,16 +1,22 @@
 import React, { useState } from "react";
 import Logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/Authcontext";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   // Assuming isAuthenticated is a boolean state that tracks user authentication status
-  const { isAuthenticated,logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
+  const location = useLocation();
 
   // Function to handle user logout (clear authentication status)
   const handleLogout = () => {
     logout();
-    window.location.reload();
+    if (location.pathname === "/") {
+      window.location.reload();
+    } else {
+      navigate("/");
+    }
     // Your logout logic here
   };
 
@@ -21,20 +27,17 @@ const Navbar = () => {
       <nav className="nav text-md font-semibold">
         <ul className="flex items-center justify-center text-center">
           {/* Navigation Links */}
-          <li className="text-blue p-4 border-b-2 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer active">
+          <li className="text-blue p-4 border-b-4 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer active">
             <Link to="/">Home</Link>
           </li>
-          <li className="text-blue p-4 border-b-2 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer active">
-            <Link to="/donations">Donations</Link>
+          <li className="text-blue p-4 border-b-4 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer active">
+            <Link to="/donations">Marketplace</Link>
           </li>
-          <li className="text-blue p-4 border-b-2 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer">
-            <a href="">About Us</a>
+          <li className="text-blue p-4 border-b-4 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer">
+            <a href="">About Barakah</a>
           </li>
-          <li className="text-blue p-4 border-b-2 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer">
-            <Link to="/contactus">Contact Us</Link>
-          </li>
-          <li className="text-blue p-4 border-b-2 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer">
-            <a href="">Donate</a>
+          <li className="text-blue p-4 border-b-4 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer">
+            <Link to="/contactus">Get in touch</Link>
           </li>
         </ul>
       </nav>
@@ -74,11 +77,18 @@ const Navbar = () => {
           </>
         ) : (
           // Render Sign Up/In button when not authenticated
-          <Link to="/signup" title="Sign Up/In">
-            <button className="bg-orange text-white py-2 px-4 shadow text-md font-semibold">
-              Sign Up/In
-            </button>
-          </Link>
+          <div className="flex gap-3">
+            <Link to="/signin" title="Sign Up">
+              <button className="border border-blue text-blue py-2 px-4 shadow text-md font-semibold">
+                Sign In
+              </button>
+            </Link>{" "}
+            <Link to="/signup" title="Sign Up">
+              <button className="bg-blue text-white py-2 px-4 shadow text-md font-semibold">
+                Sign Up
+              </button>
+            </Link>
+          </div>
         )}
       </div>
     </header>
