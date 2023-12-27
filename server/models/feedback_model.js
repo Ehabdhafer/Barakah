@@ -3,7 +3,12 @@ const db = require("./db");
 module.exports = {
   getFeedbacks: async () => {
     try {
-      const query = `select * from feedback where is_deleted = false`;
+      const query = `select feedback.* , users.username
+      from feedback 
+      inner join users 
+      on feedback.user_id = users.user_id 
+      where feedback.is_deleted = false
+      order by created_at desc`;
       const result = await db.query(query);
       return result.rows;
     } catch (err) {

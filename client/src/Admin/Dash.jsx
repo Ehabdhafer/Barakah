@@ -9,6 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import CircleChart from "./CircleChart";
+import UserCategoryChart from "./UserCat";
 
 const Dash = () => {
   const [usersCount, setUsersCount] = useState(0);
@@ -90,6 +91,9 @@ const Dash = () => {
         subscribersCount={subscribersCount}
         totalUsersCount={usersCount}
       />
+
+      {/* Circle Chart */}
+      {/* <UserCategoryChart /> */}
 
       <Users overview="yes" />
       <div className="mt-10"></div>

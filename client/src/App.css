@@ -55,3 +55,18 @@
   }
 }
 
+
+
+
+ .active_page {
+  border: solid 1px #26577C;
+  border-radius: 6px;
+  color: white;
+  background-color: #26577C;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
+
+

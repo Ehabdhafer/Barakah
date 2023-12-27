@@ -134,10 +134,10 @@ const Side = ({ onSelectMenuItem }) => {
     { name: "orders", icon: FiShoppingCart },
     { name: "messages", icon: FiMessageSquare },
     // { name: "analytics", link: "/", icon: TbReportAnalytics, margin: true },
-    // { name: "File Manager", link: "/", icon: FiFolder },
+    { name: "feedback", icon: FiFolder },
     // { name: "Cart", link: "/", icon: FiShoppingCart },
     // { name: "Saved", link: "/", icon: AiOutlineHeart, margin: true },
-    { name: "Setting", link: "/", icon: RiSettings4Line },
+    { name: "logout", icon: RiSettings4Line },
   ];
   const [open, setOpen] = useState(true);
   return (
@@ -192,12 +192,6 @@ const Side = ({ onSelectMenuItem }) => {
             </button>
           ))}
         </div>
-        <button
-          onClick={handleLogout}
-          className="ml-4 bg-transparent text-blue py-2 px-4 text-md font-semibold"
-        >
-          Log Out
-        </button>
       </div>
     </section>
   );

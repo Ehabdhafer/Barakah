@@ -4,6 +4,7 @@ const withMT = require("@material-tailwind/react/utils/withMT");
 
 module.exports = withMT({
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
+
   theme: {
     extend: {},
     colors: {
@@ -15,6 +16,13 @@ module.exports = withMT({
       div: "#EBE4D1",
       gray: "#B4B4B3",
     },
+    screens: {
+      fold: "280px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+    },
+
     fontFamily: {
       heading2: ["League Gothic", "sans-serif"],
       mont: ["Montserrat", "sans-serif"],

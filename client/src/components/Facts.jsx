@@ -1,23 +1,30 @@
 import React from "react";
 import food from "../assets/food.png";
+import card from "../assets/card.png";
+import posts from "../assets/posts.png";
+import postForm from "../assets/postform.png";
+import request from "../assets/requestForm.png";
+import details from "../assets/details.png";
 
 const Facts = () => {
   return (
-    <div className="bg-background text-center  relative">
-      <div className="bg-div absolute top-[17%] h-[13%] w-[75%] z-10 text-blue text-5xl font-bold flex justify-center items-center pl-44">
-        General Facts..
-      </div>
-      <img src={food} alt="food" className=" p-48 w-[90%] mx-auto" />
-      <div className="bg-blue w-[27%] h-[52%] absolute  left-[63%] top-[28%] text-justify text-white font-medium text-lg p-16">
-        "Approximately one-third of all the food produced globally goes to
-        waste. This staggering amount not only represents a significant loss of
-        resources but also contributes to environmental issues, including
-        greenhouse gas emissions.{" "}
-        {/* <span className="block">
-          By providing a platform for individuals and businesses to share
-          surplus and leftover food, we can collectively work towards reducing
-          this waste and building a more sustainable future."
-        </span> */}
+    <div className="bg-background  w-[50%] ">
+      <div class="grid grid-flow-col grid-rows-2 grid-cols-3 gap-8">
+        <div>
+          <img src={details} alt="" loading="lazy" />
+        </div>
+        <div class="col-start-3">
+          <img src={request} alt="" loading="lazy" />
+        </div>
+        <div>
+          <img src={postForm} alt="" loading="lazy" />
+        </div>
+        <div>
+          <img src={card} alt="" loading="lazy" />
+        </div>
+        <div class="row-start-1 col-start-2 col-span-2">
+          <img src={posts} alt="" loading="lazy" />
+        </div>
       </div>
     </div>
   );

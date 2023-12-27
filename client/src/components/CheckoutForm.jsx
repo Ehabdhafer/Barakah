@@ -55,45 +55,26 @@ const CheckoutForm = (props) => {
   };
 
   return (
-    // <div className="grid grid-cols-2 mx-4 md:mx-20 gap-5 md:gap-40 mt-20 ">
-    //   {/* <div className="product-info">
-    //     <h3 className="product-title">Apple MacBook Pro</h3>
-    //     <h4 className="product-price">$999</h4>
-    //   </div> */}
-    //   <form onSubmit={handleSubmit}>
-    //     {/* <PaymentElement /> */}
-    //     <CardSection />
-    //     <button disabled={!props.stripe} className="btn-pay">
-    //       Subscribe
-    //     </button>
-    //   </form>
-    // </div>
-
-    <div className="flex  mt-20 justify-center">
+    <div className="flex  mt-20 justify-center ">
       <div className="w-[100rem ]">
-        <h1 className="text-center font-bold   text-gray-600 md:text-2xl mb-2">
-          Checkout
+        <h1 className="text-center font-bold text-blue md:text-2xl mb-14">
+          Subscribe with us now
         </h1>
-        <div className="border-2 border-gray-300 shadow-md shadow-gray-300 rounded-lg mb-80 p-5 px-10 h-80 w-[50rem] ">
-          {/* <div className="mt-4 p-4">
-            <div className="">
-              <div className="my-3">
-                <input
-                  type="text"
-                  className="block w-full px-5 py-2 border rounded-lg bg-white shadow-lg placeholder-gray-400 text-gray-700 focus:ring focus:outline-none"
-                  placeholder="Card holder"
-                  maxLength={22}
-                  x-model="cardholder"
-                />
-              </div>
-            </div>
-          </div> */}
-
+        <div className="border-2 border-blue shadow-lg rounded-lg mb-40 p-5 px-10 h-180 w-[50rem] ">
+          <h2 className="text-center font-semibold text-blue md:text-lg mb-4">
+            Turn Your Surplus Food into Opportunities!
+          </h2>
+          <p className="text-center text-blue mb-4 font-medium">
+            Join our community to sell your surplus food by posting a priced
+            post on our website. <br />
+            For just 100 JOD a month, you can subscribe now and ensure no food
+            goes to waste.
+          </p>
           <form onSubmit={handleSubmit}>
             <CardSection />
             <div className="flex justify-center mt-7">
               <button disabled={!props.stripe} className="btn-pay">
-                Subscribe
+                Subscribe Now
               </button>
             </div>
           </form>

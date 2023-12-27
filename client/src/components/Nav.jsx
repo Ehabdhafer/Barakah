@@ -34,7 +34,7 @@ const Navbar = () => {
             <Link to="/donations">Marketplace</Link>
           </li>
           <li className="text-blue p-4 border-b-4 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer">
-            <a href="">About Barakah</a>
+            <Link to="/aboutus">About Barakah</Link>
           </li>
           <li className="text-blue p-4 border-b-4 border-blue border-opacity-0 hover:border-opacity-100 hover:text-blue duration-200 cursor-pointer">
             <Link to="/contactus">Get in touch</Link>

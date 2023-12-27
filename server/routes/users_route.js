@@ -8,7 +8,7 @@ const upload = multer({ storage: storage });
 
 router.post("/registration", userController.registerUser);
 router.post("/login", userController.loginUser);
-router.post("/logins", userController.loginUsers);
+router.post("/loginGoogle", userController.loginGoogle);
 router.get("/alluser", userController.getUserDetails);
 router.get(
   "/user",
@@ -38,8 +38,13 @@ router.get("/partners", userController.partners);
 router.post(
   "/postpartners",
   verify.authorize([1]),
+  upload.single("image"),
   userController.postpartners
 );
 router.get("/countuserdonation", userController.countuserdonation);
+
+router.post("/sendEmail", userController.sendEmail);
+router.post("/verificationCode", userController.verificationCode);
+router.put("/updatepassword", userController.updatepassword);
 
 module.exports = router;

@@ -24,7 +24,6 @@ router.post(
 );
 router.post(
   "/repostdonation",
-  // upload.single("image"),
   verify.authorize([1, 2, 3]),
   donationController.repostDonation
 );
@@ -36,8 +35,16 @@ router.put(
 );
 router.put("/deletedonation/:id", donationController.deletedonation);
 router.get("/countdonation", donationController.countdonation);
-router.put("/approvedonation/:id", donationController.approvedonation);
-router.put("/rejectDonation/:id", donationController.rejectDonation);
+router.put(
+  "/approvedonation/:id",
+  verify.authorize([1]),
+  donationController.approvedonation
+);
+router.put(
+  "/rejectDonation/:id",
+  verify.authorize([1]),
+  donationController.rejectDonation
+);
 router.get("/sortdonation", donationController.sortdateDonation);
 router.get("/alldonation/:status", donationController.allDonation);
 router.post("/searchdonation", donationController.searchdonation);

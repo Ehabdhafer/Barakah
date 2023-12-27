@@ -17,7 +17,7 @@ function Subscription() {
   );
 
   return (
-    <div className="">
+    <div>
       <div className="product ">
         <div>
           <Elements stripe={stripePromise}>

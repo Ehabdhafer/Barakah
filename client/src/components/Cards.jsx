@@ -4,12 +4,23 @@ import food from "../assets/food.png";
 import { Link } from "react-router-dom";
 import "aos/dist/aos.css";
 import Aos from "aos";
+// import Dialog from "../assets/Dialog.svg";
+import DialogTwo from "../assets/DialogTwo.svg";
 
 const Cards = () => {
   const [cards, setCards] = useState([]);
   useEffect(() => {
     Aos.init();
   }, []);
+
+  const BgBLUR = {
+    mixBlendMode: "screen",
+    // backgroundColor: "rgba(0, 0, 0, 0.5)", // Example background color
+    backgroundImage: `url(${DialogTwo})`,
+    backgroundSize: "cover",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center center",
+  };
 
   useEffect(() => {
     axios.get("http://localhost:5000/getdonation").then((response) => {
@@ -18,11 +29,14 @@ const Cards = () => {
   }, []);
 
   return (
-    <div className="bg-background flex flex-col items-center">
+    <div
+      className=" bg-background flex flex-col items-center "
+      // style={BgBLUR}
+    >
       <div className="text-blue text-4xl font-semibold text-center pt-14">
         Explore What We Offer
       </div>
-      <div className="bg-cover bg-center bg-background flex gap-3 px-10 pb-10  flex-wrap justify-center items-center mt-14">
+      <div className="bg-cover bg-center flex gap-3 px-10 pb-10  flex-wrap justify-center items-center mt-14">
         {cards
           .map((post) => (
             <div
@@ -83,7 +97,7 @@ const Cards = () => {
       <Link
         data-aos="zoom-in"
         to="/donations"
-        className="text-center p-3 text-white bg-blue shadow-sm font-semibold  "
+        className="text-center p-3 text-white bg-blue shadow-sm font-semibold   "
       >
         {" "}
         Explore More

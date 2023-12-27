@@ -99,7 +99,7 @@ const PostForm = ({ showModal, onClose, id, role_id }) => {
         <div>
           <p>
             <img
-              className="w-full h-32 object-cover"
+              className="w-full h-32 object-cover mb-4 z-10"
               src={postData[0]?.imageurl}
               alt="Food Image"
             />

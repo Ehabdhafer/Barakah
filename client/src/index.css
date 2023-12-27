@@ -44,6 +44,10 @@ body {
   z-index: 10;
 }
 
+.ReactModal__Content{
+  z-index: 10;
+}
+
 .fade-in {
   opacity: 0; /* Start with 0 opacity */
   animation: fadeIn 2s 1s forwards;
@@ -134,4 +138,75 @@ h4.product-price {
   margin-bottom: 30px;
   color: #777;
   font-weight: 500;
+}
+
+
+
+.ReactModal__Overlay {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.ReactModal__Overlay--after-open {
+  opacity: 1;
+
+}
+
+.ReactModal__Overlay--before-close {
+  opacity: 0;
+}
+
+.ReactModal__Content {
+  border: none !important;
+  background: none !important;
+  
+}
+
+
+/* Add this CSS in your stylesheet */
+/* You can customize the transition duration and other properties based on your preference */
+
+.card-container {
+transition: transform 0.3s ease-in-out; /* Add transition to the transform property */
+}
+
+.card-container:hover {
+transform: scale(0.97); /* Scale the card on hover */
+}
+
+
+.explore-button {
+position: relative;
+animation: moveUpDown 2s infinite linear;
+}
+
+.arrow {
+position: absolute;
+font-size: 28px;
+top: 100%;
+left: 50%;
+transform: translateX(-50%);
+transition: transform 0.5s ease-in-out;
+}
+
+@keyframes moveUpDown {
+0%, 100% {
+  transform: translateY(0);
+}
+
+50% {
+  transform: translateY(-10px);
+}
+}
+
+
+
+
+.active_page {
+border: solid 1px #26577C;
+border-radius: 6px;
+color: white;
+background-color: #26577C;
+padding-left: 10px;
+padding-right: 10px;
 }

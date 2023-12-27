@@ -4,7 +4,8 @@ import Modal from "react-modal";
 import Swal from "sweetalert2";
 import axios from "axios";
 import swal from "sweetalert";
-import Cookies from "js-cookie"
+import Cookies from "js-cookie";
+import { Link, useNavigate } from "react-router-dom";
 
 const PostForm = ({ showModal, onClose }) => {
   const [type, setFoodType] = useState("");
@@ -17,8 +18,7 @@ const PostForm = ({ showModal, onClose }) => {
   const [price, setPrice] = useState("");
   const [additionalnotes, setAdditionalNotes] = useState("");
   const [image, setImage] = useState(null);
-
-  
+  const navigate = useNavigate();
 
   // ... (other form state variables)
 
@@ -34,28 +34,26 @@ const PostForm = ({ showModal, onClose }) => {
       formData.append("expired", expired);
       if (expiry_date !== null) {
         formData.append("expiry_date", expiry_date);
-      } 
+      }
       formData.append("free", free);
       formData.append("price", price);
       formData.append("additionalnotes", additionalnotes);
       if (image !== null) {
         formData.append("image", image);
-      } 
-const token = Cookies.get("token");
-axios.defaults.headers.common["Authorization"] = token;
+      }
+      const token = Cookies.get("token");
+      axios.defaults.headers.common["Authorization"] = token;
       // Make a POST request to your server endpoint with Axios
-      const endpoint = free ? "http://localhost:5000/postdonation" : "http://localhost:5000/postdonationbusiness";
-      
-      const response = await axios.post(
-        endpoint,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            // Authorization: token,
-          },
-        }
-      );
+      const endpoint = free
+        ? "http://localhost:5000/postdonation"
+        : "http://localhost:5000/postdonationbusiness";
+
+      const response = await axios.post(endpoint, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          // Authorization: token,
+        },
+      });
 
       // Handle the response as needed
       console.log("Form submission successful:", response.data);
@@ -80,14 +78,10 @@ axios.defaults.headers.common["Authorization"] = token;
     } catch (error) {
       // Handle errors
       console.error("Form submission error:", error);
-      alert(error)
-
-      // Show an error sweet alert
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: "There was an error submitting the form. Please try again.",
-      });
+      if (error.response && error.response.status === 404) {
+        // If the status code is 400, it means there is a specific error message
+        navigate("/Subscription");
+      }
     }
   };
 
@@ -153,16 +147,16 @@ axios.defaults.headers.common["Authorization"] = token;
               <option value="" disabled>
                 Select a city
               </option>
-                  <option value="Amman">Amman</option>
-                  <option value="Zarqa">Zarqa</option>
-                  <option value="Irbid">Irbid</option>
-                  <option value="AlSalt">AlSalt</option>
-                  <option value="Ajloun">Ajloun</option>
-                  <option value="Aqaba">Aqaba</option>
-                  <option value="Maan">Maan</option>
-                  <option value="Karak">Karak</option>
-                  <option value="Jerash">Jerash</option>
-                  <option value="Altafila">Altafila</option>
+              <option value="Amman">Amman</option>
+              <option value="Zarqa">Zarqa</option>
+              <option value="Irbid">Irbid</option>
+              <option value="AlSalt">AlSalt</option>
+              <option value="Ajloun">Ajloun</option>
+              <option value="Aqaba">Aqaba</option>
+              <option value="Maan">Maan</option>
+              <option value="Karak">Karak</option>
+              <option value="Jerash">Jerash</option>
+              <option value="Altafila">Altafila</option>
               {/* Add more cities as needed */}
             </select>
           </div>
@@ -174,7 +168,10 @@ axios.defaults.headers.common["Authorization"] = token;
             </label>
             <select
               value={expired}
-              onChange={(e) => {setExpired(e.target.value === "true");setExpiryDate(null)}}
+              onChange={(e) => {
+                setExpired(e.target.value === "true");
+                setExpiryDate(null);
+              }}
               className="mt-1 p-2 w-full border border-blue"
             >
               <option value="false">No</option>
@@ -230,16 +227,16 @@ axios.defaults.headers.common["Authorization"] = token;
           )}
 
           {/* Image file input */}
-<div className="mb-4">
-  <label className="block text-sm font-medium text-gray-600">
-    Upload Image (Optional)
-  </label>
-  <input
-    type="file"
-    onChange={(e) => setImage(e.target.files[0])}
-    className="mt-1 p-2 w-full border border-blue"
-  />
-</div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-600">
+              Upload Image (Optional)
+            </label>
+            <input
+              type="file"
+              onChange={(e) => setImage(e.target.files[0])}
+              className="mt-1 p-2 w-full border border-blue"
+            />
+          </div>
 
           {/* Additional notes textarea */}
           <div className="mb-4">

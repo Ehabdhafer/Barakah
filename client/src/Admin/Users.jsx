@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Axios from "axios";
+import axios from "axios";
+import Cookies from "js-cookie";
 import {
   Card,
   CardBody,
@@ -12,7 +14,15 @@ import {
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 // Define the table head
-const TABLE_HEAD = ["User", "Role", "City", "Phone", "Created at", "Action"];
+const TABLE_HEAD = [
+  "User",
+  "Role",
+  "City",
+  "Phone",
+  "Created at",
+  "Subscription",
+  "Action",
+];
 
 const Users = (overview) => {
   // State to store table rows, search term, and pagination
@@ -22,76 +32,82 @@ const Users = (overview) => {
   const [totalItems, setTotalItems] = useState("");
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // useEffect(() => {
-  //   // Make an Axios request to your API endpoint with pagination parameters
-  //   Axios.get("http://localhost:5000/countalluser")
-  //     .then((response) => {
-  //       // Assuming the API response has a data property that contains the rows
-  //       setTotalItems(response.data[0].count);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching data:", error);
-  //     });
-  // }, []);
   // Fetch data from API when component mounts or when pagination changes
   useEffect(() => {
     // Make an Axios request to your API endpoint with pagination parameters
     Axios.get(
       `http://localhost:5000/alluser?page=${currentPage}&search=${searchTerm}`
     )
-      // {search:searchTerm}
       .then((response) => {
-        // Assuming the API response has a data property that contains the rows
         setTableRows(response.data);
         setTotalItems(response.data[0].total_count);
-
-        // console.log(response.data[0].total_count);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, [currentPage, itemsPerPage]); // The effect runs when currentPage or itemsPerPage changes
+  }, [currentPage, itemsPerPage]);
 
   // Handle delete button click
   const handleDelete = (user_id) => {
-    // Add your delete logic here
     Axios.put(`http://localhost:5000/deleteuser/${user_id}`)
       .then((response) => {
-        console.log(`Deleting user with id ${user_id}`);
+        // Filter out the deleted user from the tableRows state
+        setTableRows((prevRows) =>
+          prevRows.filter((row) => row.user_id !== user_id)
+        );
       })
-      .catch((error) => {});
+      .catch((error) => {
+        console.error("Error deleting user:", error);
+      });
   };
 
+  const handleAddLogo = (user_id, logoFile) => {
+    const formData = new FormData();
+    formData.append("user_id", user_id);
+    formData.append("image", logoFile);
+    const token = Cookies.get("token");
+    axios.defaults.headers.common["Authorization"] = token;
+
+    Axios.post("http://localhost:5000/postpartners", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+      .then((response) => {
+        // Handle success
+        console.log("Logo added successfully:", response.data);
+      })
+      .catch((error) => {
+        // Handle error
+        console.error("Error adding logo:", error);
+      });
+  };
+
+  // Handle search on Enter key press
   const handleSearchOnEnter = (e) => {
     if (e.key === "Enter") {
       Axios.get(
         `http://localhost:5000/alluser?page=${currentPage}&search=${searchTerm}`
       )
-        // {search:searchTerm}
         .then((response) => {
-          // Assuming the API response has a data property that contains the rows
           setTableRows(response.data);
           setTotalItems(response.data[0].total_count);
-          console.log(response);
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
         });
-      // Trigger the search when Enter key is pressed
       setCurrentPage(1); // Reset the page to 1 when a new search is performed
-      // You can perform additional logic here if needed before triggering the search
-      setSearchTerm(e.target.value);
     }
   };
 
+  // Calculate total pages for pagination
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
     <div>
       <div className="text-blue text-3xl font-bold ml-[25%] mb-4">Users</div>
-      {/* Add the search input field */}
 
-      {overview.overview == "no" && (
+      {overview.overview === "no" && (
         <div className="w-1/4 flex ml-[25%]">
           <Input
             type="text"
@@ -100,7 +116,7 @@ const Users = (overview) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => handleSearchOnEnter(e)}
-            className="bg-white w-[300px] border border-blue  "
+            className="bg-white w-[300px] border border-blue"
           />
         </div>
       )}
@@ -131,7 +147,7 @@ const Users = (overview) => {
                     city,
                     phone,
                     created_at,
-                    time,
+                    subscription,
                     user_id,
                   },
                   index
@@ -150,6 +166,10 @@ const Users = (overview) => {
                   const classes = isEvenRow
                     ? "p-4 bg-blue-gray-50"
                     : "p-4 bg-white border-b border-blue-gray-50";
+
+                  const subscriptionStatus = subscription
+                    ? "Subscriber"
+                    : "Not Subscriber";
 
                   return (
                     <tr key={email} className={classes}>
@@ -227,14 +247,43 @@ const Users = (overview) => {
                         </Typography>
                       </td>
                       <td className={classes}>
-                        <Tooltip content="Delete User">
-                          <IconButton
-                            variant="text"
-                            onClick={() => handleDelete(user_id)}
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </IconButton>
-                        </Tooltip>
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal opacity-70"
+                        >
+                          {subscriptionStatus}
+                        </Typography>
+                      </td>
+
+                      <td className={classes}>
+                        <div className="flex ">
+                          {true && (
+                            <label
+                              htmlFor="profileImageInput"
+                              className="block text-blue cursor-pointer  p-2 hover:underline  mx-auto"
+                            >
+                              Attach Logo
+                              <input
+                                type="file"
+                                id="profileImageInput"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) =>
+                                  handleAddLogo(user_id, e.target.files[0])
+                                }
+                              />
+                            </label>
+                          )}
+                          <Tooltip content="Delete User">
+                            <IconButton
+                              variant="text"
+                              onClick={() => handleDelete(user_id)}
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </IconButton>
+                          </Tooltip>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -245,10 +294,8 @@ const Users = (overview) => {
         </CardBody>
       </Card>
 
-      {console.log("Overview Value:", overview)}
-
       {/* Pagination controls */}
-      {overview.overview == "no" && (
+      {overview.overview === "no" && (
         <div className="flex justify-end mt-4 mr-16">
           <button
             onClick={() =>
@@ -264,9 +311,7 @@ const Users = (overview) => {
           </span>
           <button
             onClick={() =>
-              setCurrentPage((prevPage) =>
-                Math.min(prevPage + 1, totalPages + 1)
-              )
+              setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages))
             }
             disabled={currentPage === totalPages}
             className="ml-4 bg-blue hover:bg-blue-600 text-white cursor-pointer px-4 py-2 rounded focus:outline-none"

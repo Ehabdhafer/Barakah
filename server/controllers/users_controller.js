@@ -2,9 +2,11 @@ const userModel = require("../models/user_model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
+const db = require("../models/db.js");
 // const crypto = require("crypto");
 const Joi = require("joi");
 const firebase = require("../middleware/firebase.js");
+const nodemailer = require("nodemailer");
 
 // const secretKey1 = crypto.randomBytes(32).toString("hex");
 // console.log(secretKey1);
@@ -129,9 +131,8 @@ exports.loginUser = async (req, res) => {
 
 // ------------------------------------------------------google Login---------------------------------------------------------
 
-exports.loginUsers = async (req, res) => {
+exports.loginGoogle = async (req, res) => {
   try {
-    // console.log("object");
     const username = req.body.name;
     const { email, picture } = req.body;
     // console.log(email);
@@ -160,7 +161,7 @@ exports.loginUsers = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
       }
     } else {
-      const user = await userModel.createUsers({ username, email, picture });
+      const user = await userModel.createGoogle({ username, email, picture });
       console.log(user);
       const payload = {
         username: user.username,
@@ -357,7 +358,16 @@ exports.partners = async (req, res) => {
 exports.postpartners = async (req, res) => {
   const { user_id } = req.body;
   try {
-    await userModel.postpartners(user_id);
+    const file = req.file;
+    if (file) {
+      const fileName = `${Date.now()}_${file.originalname}`;
+
+      const fileurl = await firebase.uploadFileToFirebase(file, fileName);
+
+      req.body.logo = fileurl;
+    }
+
+    await userModel.postpartners(user_id, req.body.logo);
     res.status(200).json({
       message: "partners added successfully",
     });
@@ -376,5 +386,163 @@ exports.countuserdonation = async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send(err.message);
+  }
+};
+
+// -------------------------------------------------- forget password user -----------------------------------------
+
+const myemail = process.env.myemail;
+const mypass = process.env.mypass;
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: myemail,
+    pass: mypass,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+
+const generateVerificationCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const generatedVerificationCode = generateVerificationCode();
+
+const sendVerificationEmail = async (email, verificationCode) => {
+  const mailOptions = {
+    from: myemail,
+    to: email,
+    subject: "Email Verification Code",
+    text: `Your email verification code is: ${verificationCode}`,
+  };
+  console.log("Sending verification email to " + email);
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return verificationCode;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw new Error("Failed to send email verification");
+  }
+};
+
+let emailFromSendEmail;
+let isVerificationComplete = false;
+let isPasswordUpdated = false;
+let lastPasswordUpdateTime = null;
+
+exports.sendEmail = async (req, res) => {
+  try {
+    const email = req.body.email;
+    emailFromSendEmail = email;
+    const checkEmailQuery =
+      "SELECT user_id, password FROM users WHERE email = $1";
+
+    const emailCheck = await db.query(checkEmailQuery, [email]);
+    if (emailCheck.rows.length > 0) {
+      await sendVerificationEmail(email, generatedVerificationCode);
+      res
+        .status(200)
+        .json({ message: "Verification code email has been sent." });
+    } else {
+      res.status(404).json({ error: "Email not found in the database." });
+    }
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+    res.status(500).json({
+      error: "An error occurred while sending the verification email.",
+    });
+  }
+};
+
+exports.verificationCode = async (req, res) => {
+  const verificationCode = req.body.verificationCode;
+
+  if (verificationCode === generatedVerificationCode) {
+    if (!isPasswordUpdated) {
+      isVerificationComplete = true;
+      res.status(200).json({
+        message: "Verification successful. You can now reset your password.",
+      });
+    } else {
+      res.status(400).json({
+        error: "Password already updated. You can no longer reset it.",
+      });
+    }
+  } else {
+    res.status(400).json({
+      message: "Invalid verification code",
+    });
+  }
+};
+
+exports.updatepassword = async (req, res) => {
+  const newPassword = req.body.newPassword;
+  const confirm_password = req.body.confirm_password;
+
+  if (!isVerificationComplete) {
+    return res.status(400).json({
+      error:
+        "Verification not complete. Please enter the verification code first.",
+    });
+  }
+
+  if (isPasswordUpdated) {
+    return res.status(400).json({
+      error: "Password already updated. You can no longer reset it.",
+    });
+  }
+
+  const email = emailFromSendEmail;
+  const updateQuery = "UPDATE users SET password = $1 WHERE email = $2";
+
+  try {
+    const schema = Joi.object({
+      newPassword: Joi.string()
+        .pattern(
+          new RegExp(
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&!])[A-Za-z\\d@#$%^&!]{6,30}$"
+          )
+        )
+        .required(),
+      confirm_password: Joi.any().valid(Joi.ref("newPassword")).required(),
+    });
+
+    const validate = schema.validate({ newPassword, confirm_password });
+    if (validate.error) {
+      res.status(400).json({ error: validate.error.details });
+    } else {
+      const currentTime = new Date().getTime();
+      if (
+        lastPasswordUpdateTime &&
+        currentTime - lastPasswordUpdateTime < 30000
+      ) {
+        return res.status(400).json({
+          error: "Password can only be updated once every 30 seconds.",
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await db.query(updateQuery, [hashedPassword, email]);
+      isPasswordUpdated = true;
+      lastPasswordUpdateTime = currentTime;
+
+      // Schedule the reset of isPasswordUpdated after 30 seconds
+      setTimeout(() => {
+        isPasswordUpdated = false;
+      }, 30000);
+
+      res.status(200).json({
+        message: "Password updated successfully!",
+      });
+    }
+  } catch (err) {
+    console.error("Error updating password:", err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while updating the password" });
   }
 };

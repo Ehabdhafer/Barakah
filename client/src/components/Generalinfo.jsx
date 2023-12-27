@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import swal from "sweetalert";
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie"
-
+import Cookies from "js-cookie";
 
 const Generalinfo = ({ initialData }) => {
   const [formData, setFormData] = useState({
@@ -83,7 +82,7 @@ const Generalinfo = ({ initialData }) => {
         swal("Done!", "Profile updated successfully", "success");
         setTimeout(() => {
           window.location.reload();
-        }, 1500); 
+        }, 1500);
       } catch (error) {
         // Handle error (you can customize this part based on your API error handling)
         // swal("Error!", error, "success");
@@ -93,7 +92,7 @@ const Generalinfo = ({ initialData }) => {
 
   return (
     <div className="bg-background ">
-      <div className="max-w-2xl mx-auto  top-40 p-28 bg-white shadow-lg text-blue pt-20">
+      <div className="max-w-2xl mx-auto  top-40 p-28 bg-white shadow-lg text-blue pt-20 rounded-lg">
         <h2 className="text-2xl font-bold mb-6">General Information</h2>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -204,7 +203,7 @@ const Generalinfo = ({ initialData }) => {
           <div className="text-center mt-8">
             <button
               type="submit"
-              className="bg-orange text-white py-2 px-20 shadow-md text-md font-semibold mb-24"
+              className="bg-blue text-white py-2 px-20 shadow-md text-md font-semibold mb-24"
             >
               Update Profile
             </button>

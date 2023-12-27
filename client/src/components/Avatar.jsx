@@ -32,7 +32,7 @@ const ProfileAvatar = ({ oldProfileImage, username }) => {
         console.log("Profile image updated successfully!");
         setTimeout(() => {
           window.location.reload();
-        }, 200); 
+        }, 200);
       } else {
         console.log("No new image selected.");
       }
@@ -42,27 +42,26 @@ const ProfileAvatar = ({ oldProfileImage, username }) => {
   };
 
   return (
-    <div className="bg-white p-8 text-blue text-center  shadow-sm ">
+    <div className="bg-white p-6 text-blue text-center max-w-xl shadow-lg rounded-lg">
       <img
         src={avatarImage}
         alt="Profile Avatar"
-        className="w-24 h-24  mx-auto mb-4"
+        className="w-24 h-24 mx-auto mb-4 rounded-sm"
       />
       <h2 className="text-xl font-bold">{username}</h2>
-      <input
-        type="file"
-        id="profileImageInput"
-        accept="image/*"
-        className=""
-        onChange={handleUpdateImage}
-      />
-
-      {/* <button
-        onClick={handleUpdateImage}
-        className="bg-blue text-white px-4 py-2 mt-4 rounded-md font-medium"
+      <label
+        htmlFor="profileImageInput"
+        className="block text-white font-semibold cursor-pointer mt-4 p-2 border bg-blue w-40 mx-auto"
       >
-        Update Image
-      </button> */}
+        Attach Photo
+        <input
+          type="file"
+          id="profileImageInput"
+          accept="image/*"
+          className="hidden"
+          onChange={handleUpdateImage}
+        />
+      </label>
     </div>
   );
 };

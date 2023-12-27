@@ -40,12 +40,6 @@ const Posts = (overview) => {
 
   const [selectedFilter, setSelectedFilter] = useState("all");
 
-  const handleFilterChange = (value) => {
-    setSelectedFilter(value);
-    // Perform backend filtering based on the selected value
-    // You may want to make an Axios request here to fetch filtered data
-  };
-
   const filters = [
     { label: "All", value: "all" },
     { label: "Approved", value: "approved" },
@@ -75,17 +69,53 @@ const Posts = (overview) => {
   };
 
   useEffect(() => {
-    Axios.get(
-      `http://localhost:5000/sortdonation?page=${currentPage}&search=${searchTerm}`
-    )
-      .then((response) => {
-        setTableRows(response.data);
-        setTotalItems(response.data[0].total_count);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, [currentPage, itemsPerPage]);
+    let endpoint = "";
+
+    // Determine the endpoint based on the selected filter value
+    switch (selectedFilter) {
+      case "all":
+        endpoint = "http://localhost:5000/sortdonation";
+        break;
+      case "approved":
+        endpoint = "http://localhost:5000/alldonation/approved";
+        break;
+      case "pending":
+        endpoint = "http://localhost:5000/alldonation/pending";
+        break;
+      case "expired":
+        endpoint = "http://localhost:5000/getexpireddonation";
+        break;
+      case "not_expired":
+        endpoint = "http://localhost:5000/getnotexpireddonation";
+        break;
+      default:
+        endpoint = "http://localhost:5000/sortdonation";
+    }
+
+    // Check if the endpoint supports pagination and search
+    if (endpoint.includes("sortdonation")) {
+      // Fetch data from the endpoint with pagination and search
+      Axios.get(`${endpoint}?page=${currentPage}&search=${searchTerm}`)
+        .then((response) => {
+          setTableRows(response.data);
+          setTotalItems(response.data[0].total_count);
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    } else {
+      // Fetch data from the endpoint without search
+      Axios.get(`${endpoint}?page=${currentPage}`)
+        .then((response) => {
+          setTableRows(response.data);
+          setTotalItems(response.data[0].total_count);
+          // Update totalItems based on the response if needed
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    }
+  }, [currentPage, itemsPerPage, selectedFilter]);
 
   const handleSearchOnEnter = (e) => {
     if (e.key === "Enter") {
@@ -111,30 +141,30 @@ const Posts = (overview) => {
     <div>
       <div className="text-blue text-3xl font-bold ml-[25%] mb-4">Posts</div>
       {overview.overview == "no" && (
-        <div className="flex justify-between  ">
-          <div className="w-1/4  ml-[25%]">
-            <Input
+        <div className="flex justify-between">
+          <div className="w-1/4 ml-[25%]">
+            <input
               type="text"
               placeholder="Search..."
               name="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => handleSearchOnEnter(e)}
-              className="bg-white border border-blue p-2"
+              className="bg-white border border-gray p-2 rounded-sm"
             />
           </div>
-          <div className="w-1/7 mr-16">
-            <Select
+          <div className="w-1/7 mr-16 ">
+            <select
               value={selectedFilter}
-              onChange={(e) => handleFilterChange(e.target.value)}
-              className="text-blue bg-white "
+              onChange={(e) => setSelectedFilter(e.target.value)}
+              className="text-blue bg-white rounded-sm border-gray"
             >
               {filters.map((filter) => (
-                <Option key={filter.value} value={filter.value}>
+                <option key={filter.value} value={filter.value}>
                   {filter.label}
-                </Option>
+                </option>
               ))}
-            </Select>
+            </select>
           </div>
         </div>
       )}

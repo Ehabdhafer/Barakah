@@ -53,7 +53,7 @@ const Details = () => {
         <img
           src={postDetails.imageurl}
           alt="Food"
-          className="w-[35%] mx-auto h-64 object-cover absolute top-16 left-96 ml-12"
+          className="w-[35%] mx-auto h-64 object-cover absolute top-16 left-96 ml-24"
         />
 
         <div className="p-24 pt-60">
@@ -117,7 +117,7 @@ const Details = () => {
 
           <div className="flex">
             <button
-              className="bg-orange text-white font-semibold py-2 px-4 hover:bg-blue hover:text-white transition duration-300"
+              className=" text-white font-semibold py-2 px-4 bg-blue hover:text-white transition duration-300"
               onClick={openRequestForm}
             >
               Request Food
