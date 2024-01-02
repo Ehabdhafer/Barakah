@@ -3,7 +3,12 @@ const db = require("./db");
 module.exports = {
   getFeedbacks: async () => {
     try {
-      const query = `select * from feedback where is_deleted = false`;
+      const query = `select feedback.* , users.username, users.email
+      from feedback 
+      inner join users 
+      on feedback.user_id = users.user_id 
+      where feedback.is_deleted = false
+      order by created_at desc`;
       const result = await db.query(query);
       return result.rows;
     } catch (err) {
@@ -11,12 +16,12 @@ module.exports = {
     }
   },
 
-  postFeedback: async (message) => {
+  postFeedback: async (message, user_id, donation_id) => {
     try {
       const time = new Date();
-      const query = `insert into feedback (message, created_at)
-        values ($1, $2)`;
-      const values = [message, time];
+      const query = `insert into feedback (message, created_at, user_id, donation_id)
+        values ($1, $2, $3, $4)`;
+      const values = [message, time, user_id, donation_id];
       await db.query(query, values);
     } catch (err) {
       throw err;

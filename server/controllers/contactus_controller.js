@@ -4,7 +4,9 @@ const contactmodel = require("../models/contactus_model");
 
 exports.getcontact = async (req, res) => {
   try {
-    const result = await contactmodel.getContacts();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await contactmodel.getContacts(page, limit);
     res.json(result);
   } catch (err) {
     console.error(err);

@@ -51,9 +51,9 @@ const Details = () => {
     <div className="bg-background pt-28 relative pb-24">
       <div className="max-w-[50%] mx-auto bg-white overflow-hidden shadow-lg">
         <img
-          src={food}
+          src={postDetails.imageurl}
           alt="Food"
-          className="w-[35%] mx-auto h-64 object-cover absolute top-16 left-96 ml-12"
+          className="w-[35%] mx-auto h-64 object-cover absolute top-16 left-96 ml-24"
         />
 
         <div className="p-24 pt-60">
@@ -92,12 +92,13 @@ const Details = () => {
 
           <div className="flex items-center gap-20 text-blue mb-4">
             <div className="mb-4 flex flex-col">
-              <span className="font-bold">Quantity:</span>{" "}
-              {postDetails.qty}
+              <span className="font-bold">Quantity:</span> {postDetails.qty}
             </div>
             <div className="mb-4 flex flex-col">
               <span className="font-bold">Expiry Date:</span>{" "}
-              {postDetails.expired ? "Expired" : postDetails.expiry_date}
+              {postDetails.expired
+                ? "Expired"
+                : postDetails.expiry_date.split("T")[0]}
             </div>
             <div className="mb-4 flex flex-col">
               <span className="font-bold">Price:</span>{" "}
@@ -116,7 +117,7 @@ const Details = () => {
 
           <div className="flex">
             <button
-              className="bg-orange text-white font-semibold py-2 px-4 hover:bg-blue hover:text-white transition duration-300"
+              className=" text-white font-semibold py-2 px-4 bg-blue hover:text-white transition duration-300"
               onClick={openRequestForm}
             >
               Request Food

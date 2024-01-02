@@ -3,20 +3,26 @@ import Modal from "react-modal";
 import axios from "axios";
 import Swal from "sweetalert2";
 import swal from "sweetalert";
-import Cookies from "js-cookie"
+import Cookies from "js-cookie";
 
-
-const PostForm = ({ showModal, onClose,id }) => {
+const PostForm = ({ showModal, onClose, id, role_id }) => {
   const [postData, setPostData] = useState([]);
   // console.log(postData[0].type);
+  console.log("hi" + role_id);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = Cookies.get("token");
         axios.defaults.headers.common["Authorization"] = token;
+        console.log(role_id);
+        const endpoint =
+          role_id == 3
+            ? `http://localhost:5000/getconfirmhistorydonate/${id}`
+            : `http://localhost:5000/getconfirmhistoryorder/${id}`;
 
-        const response = await axios.get(`http://localhost:5000/getconfirmhistory/${id}`); // Replace '1' with the actual post ID you want to display
+        const response = await axios.get(endpoint);
+        console.log(id);
         setPostData(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -30,21 +36,22 @@ const PostForm = ({ showModal, onClose,id }) => {
     try {
       // Prepare the data object with all form details
       const formData = {
-        type:postData.type,
-        details:postData.details,
-        qty:postData.qty,
-        city:postData.city,
-        expired:postData.expired,
-        expiry_date:postData.expiry_date,
-        free:postData.free,
-        price:postData.price,
-        additionalnotes:postData.additionalnotes,
+        type: postData[0]?.type,
+        details: postData[0]?.details,
+        qty: postData[0]?.qty,
+        city: postData[0]?.city,
+        expired: postData[0]?.expired,
+        expiry_date: postData[0]?.expiry_date,
+        free: postData[0]?.free,
+        price: postData[0]?.price,
+        additionalnotes: postData[0]?.additionalnotes,
+        imageurl: postData[0]?.imageurl,
         // Add other form fields as needed
       };
-const token = Cookies.get("token");
-axios.defaults.headers.common["Authorization"] = token;
+      const token = Cookies.get("token");
+      axios.defaults.headers.common["Authorization"] = token;
       // Make a POST request to your server endpoint with Axios
-      
+
       const response = await axios.post(
         `http://localhost:5000/repostdonation`,
         formData
@@ -73,7 +80,7 @@ axios.defaults.headers.common["Authorization"] = token;
     } catch (error) {
       // Handle errors
       console.error("Form submission error:", error);
-      alert(error)
+      alert(error);
 
       // Show an error sweet alert
       Swal.fire({
@@ -81,8 +88,8 @@ axios.defaults.headers.common["Authorization"] = token;
         title: "Error!",
         text: "There was an error submitting the form. Please try again.",
       });
-
-  }}
+    }
+  };
 
   return (
     <Modal isOpen={showModal} onRequestClose={onClose}>
@@ -90,6 +97,13 @@ axios.defaults.headers.common["Authorization"] = token;
         <h2 className="text-2xl font-bold mb-6">Post Details</h2>
         {/* Display fetched data here */}
         <div>
+          <p>
+            <img
+              className="w-full h-32 object-cover mb-4 z-10"
+              src={postData[0]?.imageurl}
+              alt="Food Image"
+            />
+          </p>
           <p>
             <strong>Food Type:</strong> {postData[0]?.type}
           </p>
@@ -107,7 +121,8 @@ axios.defaults.headers.common["Authorization"] = token;
           </p>
           {!postData[0]?.expired && (
             <p>
-              <strong>Expiry Date:</strong> {postData[0]?.expiry_date}
+              <strong>Expiry Date:</strong>{" "}
+              {postData[0]?.expiry_date.split("T")[0]}
             </p>
           )}
           <p>
@@ -124,13 +139,17 @@ axios.defaults.headers.common["Authorization"] = token;
         </div>
 
         <div className="flex justify-end gap-3 mt-2">
-          <button
-            type="button"
-            onClick={handleRepost}
-            className="text-white p-2 bg-blue "
-          >
-            Repost
-          </button>
+          {role_id == 3 ? (
+            <button
+              type="button"
+              onClick={handleRepost}
+              className="text-white p-2 bg-blue "
+            >
+              Repost
+            </button>
+          ) : (
+            ""
+          )}
           <button
             type="button"
             onClick={onClose}

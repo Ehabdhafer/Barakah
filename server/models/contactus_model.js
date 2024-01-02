@@ -1,10 +1,15 @@
 const db = require("./db");
 
 module.exports = {
-  getContacts: async () => {
+  getContacts: async (page, limit) => {
     try {
-      const query = `select * from contact_us where is_deleted = false`;
-      const result = await db.query(query);
+      if (page <= 0 || limit <= 0) {
+        throw new Error("Invalid page or limit parameter");
+      }
+      const offset = (page - 1) * limit;
+      const query = `select *,COUNT(*) OVER () as total_count from contact_us where is_deleted = false
+      order by submitted_at desc LIMIT $1 OFFSET $2`;
+      const result = await db.query(query, [limit, offset]);
       return result.rows;
     } catch (err) {
       throw err;

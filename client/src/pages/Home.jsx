@@ -7,11 +7,12 @@ import Partners from "../components/Partners";
 
 const Home = () => {
   return (
-    <div>
+    <div className="bg-background ">
       <Hero />
       <WhatWeDo />
-      <Facts />
       <Cards />
+      {/* <Facts /> */}
+      <div className="h-20"></div>
       <Partners />
     </div>
   );

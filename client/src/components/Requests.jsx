@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import RequestForm from "./RequestForm"; // Import the RequestForm component
 import AcceptForm from "./AcceptForm";
-import Cookies from "js-cookie"
-
+import Cookies from "js-cookie";
 
 const Requests = () => {
   const [requestsData, setRequestsData] = useState([]);
@@ -41,18 +40,18 @@ const Requests = () => {
   };
 
   return (
-    <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-8">
+    <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-8 w-[80%] mx-auto mb-20">
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
-        <thead className="text-md text-blue uppercase bg-white ">
+        <thead className="text-md text-blue uppercase bg-[#ececec]  ">
           <tr>
             <th scope="col" className="px-6 py-5 text-center">
-              Name
+              Requester Name
             </th>
             <th scope="col" className="px-6 py-5 text-center">
-              Industry
+              Requester Industry
             </th>
             <th scope="col" className="px-6 py-5 text-center">
-              Post
+              Requested Post
             </th>
             <th scope="col" className="px-6 py-5 text-center">
               Action
@@ -60,10 +59,12 @@ const Requests = () => {
           </tr>
         </thead>
         <tbody>
-          {requestsData.map((requestData) => (
+          {requestsData.map((requestData, index) => (
             <tr
               key={requestData.order_id} // Replace 'id' with the actual identifier property from your API data
-              className="bg-white border-b-[0.01rem] border-[#00000023] hover:bg-[#ececec] text-center"
+              className={`${
+                index % 2 !== 0 ? "bg-[#ececec]" : "bg-white"
+              } border-b-[0.01rem] border-[#d8d6d6] hover:bg-[#ececec] text-center`}
             >
               <th
                 scope="row"

@@ -27,8 +27,8 @@ exports.createCheckoutSession = async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,
-      success_url: "https://localhost:3000/success",
-      cancel_url: "https://localhost:3000/cancel",
+      success_url: "http://localhost:3000/donations",
+      cancel_url: "http://localhost:3000",
       line_items: checkoutObject.line_items,
       mode: checkoutObject.mode,
       subscription_data: checkoutObject.subscription_data,

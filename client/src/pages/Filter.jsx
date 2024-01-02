@@ -25,59 +25,51 @@ const sortOptions = [
   { name: "Price: High to Low", href: "#", current: false },
 ];
 
-// const subCategories = [
-//   { name: "Totes", href: "#" },
-//   { name: "Backpacks", href: "#" },
-//   { name: "Travel Bags", href: "#" },
-//   { name: "Hip Bags", href: "#" },
-//   { name: "Laptop Sleeves", href: "#" },
-// ];
 const filters = [
   {
-    id: "providers",
+    id: "industry",
     name: "Providers",
     options: [
-      { value: "Restaurent", label: "Restaurent", checked: false },
-      { value: "SuperMarket", label: "SuperMarket", checked: false },
+      { value: "Restaurant", label: "Restaurent", checked: false },
+      { value: "Supermarket", label: "SuperMarket", checked: false },
       {
-        value: "FoodManufacturer",
+        value: "foodManufacturer",
         label: "Food Manufacturer",
         checked: false,
       },
-      { value: "Agriculture", label: "Agriculture", checked: false },
-      { value: "Caterer", label: "Caterer", checked: false },
-      { value: "Indivisual", label: "Indivisual", checked: false },
+      { value: "agriculture", label: "Agriculture", checked: false },
+      { value: "caterer", label: "Caterer", checked: false },
+      { value: "individual", label: "Indivisual", checked: false },
     ],
   },
   {
     id: "city",
     name: "City",
     options: [
-      { value: "amman", label: "Amman", checked: false },
-      { value: "zarqa", label: "Zarqa", checked: false },
-      { value: "irbid", label: "Irbid", checked: false },
-      { value: "aqaba", label: "Aqaba", checked: false },
-      { value: "madaba", label: "Madaba", checked: false },
-      { value: "mafraq", label: "Mafraq", checked: false },
-      { value: "salt", label: "Salt", checked: false },
-      { value: "ajloun", label: "Ajloun", checked: false },
-      { value: "jerash", label: "Jerash", checked: false },
-      { value: "maan", label: "Ma'an", checked: false },
-      { value: "tafila", label: "Tafila", checked: false },
+      { value: "Amman", label: "Amman", checked: false },
+      { value: "Zarqa", label: "Zarqa", checked: false },
+      { value: "Irbid", label: "Irbid", checked: false },
+      { value: "Aqaba", label: "Aqaba", checked: false },
+      { value: "Karak", label: "Karak", checked: false },
+      { value: "AlSalt", label: "AlSalt", checked: false },
+      { value: "Ajloun", label: "Ajloun", checked: false },
+      { value: "Jerash", label: "Jerash", checked: false },
+      { value: "Maan", label: "Maan", checked: false },
+      { value: "Altafila", label: "Altafila", checked: false },
     ],
   },
   {
-    id: "price",
+    id: "free",
     name: "Free/Paid",
     options: [
-      { value: "free", label: "Free", checked: false },
-      { value: "paid", label: "Paid", checked: false },
+      { value: "true", label: "Free", checked: false },
+      { value: "false", label: "Paid", checked: false },
     ],
   },
   {
     id: "expired",
     name: "Expired",
-    options: [{ value: "expired", label: "Expired", checked: false }],
+    options: [{ value: "true", label: "Expired", checked: false }],
   },
 ];
 
@@ -88,12 +80,22 @@ function classNames(...classes) {
 export default function Filter() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [donations, setDonations] = useState([]);
+  const [displayed, setDisplayed] = useState([]);
   const [pageNumber, setPageNumber] = useState(0);
   const productsPerPage = 15; // Set the number of products per page
   //   const [isAuthenticated, setIsAuthenticated] = useState(true); // Set this based on your authentication state
   const { isAuthenticated } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+
+  const [selectedFilters, setSelectedFilters] = useState({
+    industry: [],
+    city: [],
+    free: [],
+    expired: [],
+  });
+
+  const [selectedSortOption, setSelectedSortOption] = useState(sortOptions[0]);
 
   const handleFormClick = () => {
     if (isAuthenticated()) {
@@ -129,20 +131,99 @@ export default function Filter() {
       .get("http://localhost:5000/getdonation")
       .then((response) => {
         setDonations(response.data);
+        setDisplayed(response.data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
   }, []);
 
-  const pageCount = Math.ceil(donations.length / productsPerPage);
-  const displayedProducts = donations.slice(
+  useEffect(() => {
+    // Apply filters to the donations data
+    let filteredData = [...donations];
+    for (const filterType in selectedFilters) {
+      if (selectedFilters[filterType].length > 0) {
+        if (filterType == "free") {
+          filteredData = filteredData.filter((post) =>
+            selectedFilters[filterType][0].includes(post[filterType])
+          );
+        } else if (filterType == "expired") {
+          filteredData = filteredData.filter((post) =>
+            selectedFilters[filterType][0].includes(post[filterType])
+          );
+        } else {
+          filteredData = filteredData.filter((post) => {
+            console.log("original", post[filterType]);
+            console.log("selected", selectedFilters[filterType]);
+            return selectedFilters[filterType].includes(post[filterType]);
+          });
+        }
+      }
+      console.log("fffffffffffffff", filteredData);
+    }
+
+    // Sort the filtered data based on the selected sort option
+    if (selectedSortOption.name === "Newest") {
+      filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (selectedSortOption.name === "Longest shelf life") {
+      filteredData.sort((a, b) => {
+        if (!a.expiry_date && !b.expiry_date) {
+          return 0; // If both items have null/undefined expiry_date, maintain their relative order
+        }
+        if (!a.expiry_date) {
+          return 1; // Move items with null/undefined expiry_date to the end
+        }
+        if (!b.expiry_date) {
+          return -1; // Keep items with null/undefined expiry_date at the end
+        }
+        return new Date(b.expiry_date) - new Date(a.expiry_date); // Compare dates for non-null/undefined expiry_date
+      });
+    } else if (selectedSortOption.name === "Price: Low to High") {
+      filteredData.sort((a, b) => a.price - b.price);
+    } else if (selectedSortOption.name === "Price: High to Low") {
+      filteredData.sort((a, b) => b.price - a.price);
+    }
+
+    // Update the displayed data based on the filtered results
+    setDisplayed(filteredData);
+    // Reset page number to 0 when filters change
+    setPageNumber(0);
+  }, [selectedFilters, selectedSortOption, donations]);
+
+  const pageCount = Math.ceil(displayed.length / productsPerPage);
+  const displayedProducts = displayed.slice(
     pageNumber * productsPerPage,
     (pageNumber + 1) * productsPerPage
   );
 
   const handlePageClick = ({ selected }) => {
     setPageNumber(selected);
+  };
+
+  const handleSearch = (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+
+    // Filter the donations based on the search term
+    const searchResults = donations.filter((post) =>
+      post.type.toLowerCase().includes(searchTerm)
+    );
+
+    // Update the displayedProducts state with the search results
+    setDisplayed(searchResults);
+  };
+
+  const handleFilterChange = (filterType, value, checked) => {
+    setSelectedFilters((prevFilters) => {
+      const updatedFilters = { ...prevFilters };
+      if (checked) {
+        updatedFilters[filterType] = [...updatedFilters[filterType], value];
+      } else {
+        updatedFilters[filterType] = updatedFilters[filterType].filter(
+          (filterValue) => filterValue !== value
+        );
+      }
+      return updatedFilters;
+    });
   };
 
   return (
@@ -241,9 +322,18 @@ export default function Filter() {
                                     <input
                                       id={`filter-mobile-${section.id}-${optionIdx}`}
                                       name={`${section.id}[]`}
-                                      defaultValue={option.value}
+                                      value={option.value}
                                       type="checkbox"
-                                      defaultChecked={option.checked}
+                                      checked={selectedFilters[
+                                        section.id
+                                      ].includes(option.value)}
+                                      onChange={(e) =>
+                                        handleFilterChange(
+                                          section.id,
+                                          option.value,
+                                          e.target.checked
+                                        )
+                                      }
                                       className="h-4 w-4 rounded border-gray-300 text-blue focus:ring-indigo-500"
                                     />
                                     <label
@@ -268,10 +358,56 @@ export default function Filter() {
         </Transition.Root>
 
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
-            <h1 className="text-4xl font-bold tracking-tight text-blue">
+          <div className="flex flex-col gap-4 sm:flex-row items-end  justify-between border-b border-gray-200 pb-6 pt-24">
+            <h1 className="text-4xl font-bold tracking-tight text-blue hidden sm:block  ">
               Posts
             </h1>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+              }}
+            >
+              <label
+                for="default-search"
+                class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
+              >
+                Search
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                  <svg
+                    class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="search"
+                  id="default-search"
+                  class="block w-[254px] sm:w-[300px] md:w-[450px] lg:w-[500px] p-4 ps-10 text-sm h-11 text-gray-900 border border-blue rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="Search Oil, Rice..."
+                  onChange={handleSearch}
+                  //required
+                />
+                <button
+                  type="submit"
+                  class="text-white absolute end-2.5 bottom-2.5 bg-blue hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-1 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                >
+                  Search
+                </button>
+              </div>
+            </form>
 
             <div className="flex items-center">
               <Menu as="div" className="relative inline-block text-left">
@@ -308,6 +444,10 @@ export default function Filter() {
                                 active ? "bg-gray-100" : "",
                                 "block px-4 py-2 text-sm"
                               )}
+                              onClick={() => {
+                                setSelectedSortOption(option);
+                                // setMobileFiltersOpen(false); // Close the mobile filters dialog when a sort option is selected
+                              }}
                             >
                               {option.name}
                             </a>
@@ -319,13 +459,6 @@ export default function Filter() {
                 </Transition>
               </Menu>
 
-              <button
-                type="button"
-                className="-m-2 ml-5 p-2 text-blue hover:text-blue sm:ml-7"
-              >
-                <span className="sr-only">View grid</span>
-                <Squares2X2Icon className="h-5 w-5" aria-hidden="true" />
-              </button>
               <button
                 type="button"
                 className="-m-2 ml-4 p-2 text-blue hover:text-blue sm:ml-6 lg:hidden"
@@ -397,9 +530,19 @@ export default function Filter() {
                                   name={`${section.id}[]`}
                                   defaultValue={option.value}
                                   type="checkbox"
-                                  defaultChecked={option.checked}
-                                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                  checked={selectedFilters[section.id].includes(
+                                    option.value
+                                  )}
+                                  onChange={(e) =>
+                                    handleFilterChange(
+                                      section.id,
+                                      option.value,
+                                      e.target.checked
+                                    )
+                                  }
+                                  className="h-4 w-4 rounded border-gray-300 text-blue focus:ring-indigo-500"
                                 />
+
                                 <label
                                   htmlFor={`filter-${section.id}-${optionIdx}`}
                                   className="ml-3 text-sm text-blue"
@@ -417,73 +560,106 @@ export default function Filter() {
               </form>
 
               {/* Product grid */}
-              <div className="lg:col-span-5">
-                {/* Your content */}
-
-                <div className="flex flex-wrap gap-3 justify-around">
-                  {displayedProducts.map((post) => (
-                    <div
-                      key={post.id}
-                      className="max-w-xs w-full overflow-hidden shadow-lg mb-5 card-container"
-                    >
-                      <img
-                        className="w-full h-32 object-cover"
-                        src={food}
-                        alt="Food Image"
-                      />
-                      <div className="px-4 py-2 bg-white">
-                        <Link to={`/details/${post.donation_id}`}>
-                          <div className="font-bold text-sm mb-1 text-blue">
-                            {post.type}
-                          </div>
-                        </Link>
-                        <div className="text-gray-700 text-xs flex gap-1 mb-1">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="w-4 h-4 inline-block"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-                            />
-                          </svg>
-
-                          {post.city}
-                        </div>
-                        <p className="text-gray-700 text-xs mb-2">
-                          Posted by: {post.username}
-                        </p>
-                        <p className="text-gray-700 text-xs flex justify-end">
-                          {post.created_at}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+              {displayedProducts.length === 0 ? (
+                <div className="flex flex-col   justify-center h-48 items-center mx-auto col-span-4 ml-[40%]  ">
+                  <p className="text-blue text-2xl  font-semibold ">
+                    No Matches Found
+                  </p>
+                  <p className="text-gray-500 text-xl mt-3  ">
+                    Please try another search.
+                  </p>
                 </div>
-                <ReactPaginate
-                  className="flex flex-row gap-6 m-10 justify-center text-blue font-medium"
-                  previousLabel={"Previous"}
-                  nextLabel={"Next"}
+              ) : (
+                <div className="lg:col-span-5">
+                  {/* Your content */}
+
+                  <div className="flex flex-wrap gap-3 justify-around">
+                    {displayedProducts.map((post) => (
+                      <div
+                        key={post.id}
+                        className="max-w-xs w-full overflow-hidden shadow-lg mb-5 card-container"
+                      >
+                        <img
+                          className="w-full h-32 object-cover"
+                          src={post.imageurl}
+                          alt="Food Image"
+                        />
+                        <div className="px-4 py-2 bg-white">
+                          <Link to={`/details/${post.donation_id}`}>
+                            <div className="font-bold text-sm mb-1 text-blue">
+                              {post.type}
+                            </div>
+                          </Link>
+                          <div className="text-gray-700 text-xs flex gap-1 mb-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="w-4 h-4 inline-block"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                              />
+                            </svg>
+
+                            {post.city}
+                          </div>
+                          <p className="text-gray-700 text-xs mb-2">
+                            Posted by: {post.username}
+                          </p>
+                          <div className="flex justify-between">
+                            <p className="text-gray-700 text-xs flex justify-start">
+                              {post.price} JOD
+                            </p>
+                            <p className="text-gray-700 text-xs flex justify-end">
+                              {post.time.split()} / {post.date.split("T")[0]}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <ReactPaginate
+                    className="flex flex-row gap-6 m-10 justify-center text-blue font-medium"
+                    previousLabel={"Previous"}
+                    nextLabel={"Next"}
+                    breakLabel={"..."}
+                    pageCount={pageCount}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={handlePageClick}
+                    containerClassName={"pagination"}
+                    subContainerClassName={"pages pagination"}
+                    activeClassName="active_page"
+                  />
+
+                  {/* <ReactPaginate
+                  activeClassName={"item active_page "}
+                  breakClassName={"item break-me "}
                   breakLabel={"..."}
-                  pageCount={pageCount}
-                  marginPagesDisplayed={2}
-                  pageRangeDisplayed={5}
-                  onPageChange={handlePageClick}
                   containerClassName={"pagination"}
-                  subContainerClassName={"pages pagination"}
-                  activeClassName={"active"}
-                />
-              </div>
+                  disabledClassName={"disabled-page"}
+                  marginPagesDisplayed={2}
+                  nextClassName={"item next "}
+                  nextLabel={"next"}
+                  onPageChange={handlePageClick}
+                  pageCount={pageCount}
+                  pageClassName={"item pagination-page "}
+                  pageRangeDisplayed={5}
+                  previousClassName={"item previous"}
+                  previousLabel={"previous"}
+                /> */}
+                </div>
+              )}
             </div>
           </section>
         </main>

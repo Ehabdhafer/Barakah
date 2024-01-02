@@ -7,11 +7,7 @@ const verify = require("../middleware/authorizationJWT");
 // verify.authorize([1, 2, 3, 4, 5]),
 
 router.get("/getallorder", orderController.getorder);
-router.post(
-  "/postorder",
-  verify.authorize([1, 2, 3, 4, 5]),
-  orderController.postorder
-);
+router.post("/postorder", verify.authorize([2, 4]), orderController.postorder);
 // router.get("/getorder/:id", orderController.getorderid);
 router.get(
   "/getorderid",
@@ -19,7 +15,11 @@ router.get(
   orderController.getorderid
 );
 router.put("/updateorder/:id", orderController.updateorder);
-router.put("/deleteorder/:id", orderController.deleteorder);
+router.put(
+  "/deleteorder/:id",
+  verify.authorize([1]),
+  orderController.deleteorder
+);
 // router.get("/getorderhistory/:id", orderController.getorderhistory);
 
 module.exports = router;

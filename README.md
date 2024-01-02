@@ -34,7 +34,7 @@ Project Brief [Link](https://drive.google.com/file/d/1N-H7coPP_w5kpWO4gsPFz3MvCU
 
 Documentation [Link](https://docs.google.com/document/d/162bQBZFlF41hLS3wOOo2r4haDScfO6WuzLR1JENBRSc/edit?usp=sharing).
 
-Presentation [Link](https://gamma.app/docs/Barakah-Project-pgpm8u10pb6fo5u?mode=doc).
+Presentation [Link](https://www.canva.com/design/DAF4M3AHSik/guzYYxAayrG8sQOkjza7fw/edit?utm_content=DAF4M3AHSik&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton).
 
 ### Figma Link
 

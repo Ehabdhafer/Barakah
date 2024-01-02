@@ -3,10 +3,8 @@ import React, { useState } from "react";
 import Modal from "react-modal";
 import Swal from "sweetalert2";
 import axios from "axios";
-import Cookies from "js-cookie"
+import Cookies from "js-cookie";
 import { useParams } from "react-router-dom";
-
-
 
 const RequestForm = ({ isOpen, onClose }) => {
   const [order_city, setDeliveryAddress] = useState("");
